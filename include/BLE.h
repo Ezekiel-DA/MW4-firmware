@@ -10,6 +10,8 @@ class BLEUUID;
 
 static bool deviceConnected = false;
 
+BLEServer* setupBLE();
+
 /**
  * Create a new BLE Descriptor with the 0x2901 UUID (i.e. "Characteristic User Description"), set it to the provided name, and attach it to the given BLE Characteristic.
  * Note: to save on memory, names should not exceed 15 characters.

@@ -9,11 +9,10 @@ private:
   BLEService* _service = nullptr;
 
 public:
-  CostumeControlService(BLEServer* iServer);
+  CostumeControlService(BLEServer* iServer, uint8_t iVersion);
   
   void onWrite(BLECharacteristic* characteristic);
 
-  std::string _text = "I WANT YOU";
-  bool _customOffset = true;
-  int16_t _offset = 0;
+private:
+  uint8_t _fwVersion;
 };

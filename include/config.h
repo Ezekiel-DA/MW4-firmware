@@ -1,48 +1,31 @@
 #pragma once
 
-#define MW_RFID_DATA_BLOCK_ADDR 4
-
 #define STATUS_LED_PIN 5
 
 // the advertised service, allowing clients to find us
-#define MWNEXT_BLE_COSTUME_CONTROL_SERVICE_UUID           "47191881-ebb3-4a9f-9645-3a5c6dae4900"
+#define MW4_BLE_COSTUME_CONTROL_SERVICE_UUID                      "47191881-ebb3-4a9f-9645-3a5c6dae4900"
+#define MW4_BLE_COSTUME_CONTROL_FW_VERSION_CHARACTERISTIC_UUID    "55cf24c7-7a28-4df4-9b53-356b336bab71"
+#define MW4_BLE_COSTUME_CONTROL_OTA_CHARACTERISTIC_UUID         	"1083b9a4-fdc0-4aa6-b027-a2600c8837c4"
 
-// characteristics for the main service, giving access to Peripheral-wide functions
-#define MWNEXT_BLE_TAG_PRESENT_CHARACTERISTIC_UUID        "68344255-0632-4635-93f0-178bd0d7e577"
-#define MWNEXT_BLE_TAG_WRITE_REQUEST_CHARACTERISTIC_UUID  "64957168-79ba-469b-96e9-ccf53086c4c3"
-#define MWNEXT_BLE_TAG_WRITE_ERROR_CHARACTERISTIC_UUID    "acd33ab1-eda9-4790-8ce2-f9fe951b3e25"
+// Light controlling services; multiple instances allowed
+#define MW4_BLE_LIGHT_DEVICE_SERVICE_UUID                        "0ba35e90-f55f-4f15-9347-3dc4a0287881"
+#define MW4_BLE_CAPABILITIES_CHARACTERISTIC_UUID                 "ed8128c1-5bfa-418c-9a4d-af2596f92952"
+#define MW4_BLE_ID_CHARACTERISTIC_UUID                           "63c62656-807f-4db4-97d3-94095962acf8"
+#define MW4_BLE_STATE_CHARACTERISTIC_UUID                        "c2af353b-e5fc-4bdf-b743-5d226f1198a2"
+#define MW4_BLE_MODE_CHARACTERISTIC_UUID                         "b54fc13b-4374-4a6f-861f-dd198f88f299"
+#define MW4_BLE_CYCLE_COLOR_CHARACTERISTIC_UUID                  "dfe34849-2d42-4222-b6b1-617a4f4d0869"
+#define MW4_BLE_HUE_CHARACTERISTIC_UUID                          "19dfe175-aa12-404b-843d-b625937cffff"
+#define MW4_BLE_SATURATION_CHARACTERISTIC_UUID                   "946d22e6-2b2f-49e7-b941-150b023f2261"
+#define MW4_BLE_VALUE_CHARACTERISTIC_UUID                        "6c5df188-2e69-4f2f-b4ab-9d2b76ef7aa9"
+#define MW4_BLE_ADDRESSABLE_DATA_CHARACTERISTIC_UUID             "8d4510e9-8565-49a4-8813-f45f49061833"
 
-// non advertised, light controlling services
-#define MWNEXT_BLE_WINDOWS_SERVICE_UUID                   "c3f48cdf-18bb-4947-bef2-f804d59d74da"
-#define MWNEXT_BLE_CLOUDS_SERVICE_UUID                    "f248fd08-0326-482e-b023-db6e3f6bb250"
-#define MWNEXT_BLE_WALLS_SERVICE_UUID                     "b3701981-4955-49d5-bd2d-e2ea57e8e64c"
-#define MWNEXT_BLE_MOAT_SERVICE_UUID                      "5180f077-a430-4a6d-b6ea-cdf1075a0dd9"
-#define MWNEXT_BLE_STARS_SERVICE_UUID                     "c634d6bf-0f7b-4580-b342-7aa2d42dedab"
-
-// characteristics for our light controlling services 
-#define MWNEXT_BLE_DEVICE_TYPE_CHARACTERISTIC_UUID        "8106f98f-fb24-4b97-a995-47a1695cea75"
-#define MWNEXT_BLE_MODE_CHARACTERISTIC_UUID               "b54fc13b-4374-4a6f-861f-dd198f88f299"
-#define MWNEXT_BLE_HUE_CHARACTERISTIC_UUID                "19dfe175-aa12-404b-843d-b625937cffff"
-#define MWNEXT_BLE_CYCLE_COLOR_CHARACTERISTIC_UUID        "dfe34849-2d42-4222-b6b1-617a4f4d0869"
-#define MWNEXT_BLE_SATURATION_CHARACTERISTIC_UUID         "946d22e6-2b2f-49e7-b941-150b023f2261"
-
-// characteristics for our text display matrix service
-#define MWNEXT_BLE_TEXT_DISPLAY_TEXT_CHARACTERISTIC_UUID  "c5b56d2e-b6e9-49c7-b098-5af9a75f46cd"
-#define MWNEXT_BLE_TEXT_DISPLAY_OFFSET_UUID               "a0f348d3-5c80-420f-bb5f-1732824ac215"
-#define MWNEXT_BLE_TEXT_DISPLAY_CUSTOMIZE_OFFSET_UUID     "966c3d0d-493c-4b59-ae1d-d3768ff9ada8"
-
-// TODO: rethink this whole thing. This probably needs to be some sort of bitfield of capabilities?
-// Right now, though:
-// 1: RGB LED; can do patterns and colors
-// 2: MONO LED: can do patterns, cannot do colors
-// 3: ONOFF_PORT: cannot do patterns, cannot do colors; style uses the MODE characteristic to indicate a "Pattern ID", but the only two legal values are 0: off and 1: on
-enum struct MWNEXT_DEVICE_TYPE {
-  RGB_LED = 1,
-  MONO_LED,
-  ONOFF_PORT
-};
-
-enum struct MWNEXT_WRITE_REQUEST_ERROR {
-  MFRC522_ERROR = 1,
-  NO_TAG,
-};
+// Text display matrix service
+#define MW4_BLE_TEXT_DISPLAY_SERVICE_UUID                             "aafca82b-95ae-4f33-9cf3-7ee0ef15ddf4"
+#define MW4_BLE_TEXT_DISPLAY_TEXT_CHARACTERISTIC_UUID                 "c5b56d2e-b6e9-49c7-b098-5af9a75f46cd"
+#define MW4_BLE_TEXT_DISPLAY_OFFSET_CHARACTERISTIC_UUID               "a0f348d3-5c80-420f-bb5f-1732824ac215"
+#define MW4_BLE_TEXT_DISPLAY_SCROLLING_CHARACTERISTIC_UUID            "966c3d0d-493c-4b59-ae1d-d3768ff9ada8"
+#define MW4_BLE_TEXT_DISPLAY_SCROLL_SPEED_CHARACTERISTIC_UUID         "1fc1cf59-0e88-4dda-81fc-818a14da216b"
+#define MW4_BLE_TEXT_DISPLAY_PAUSE_TIME_CHARACTERISTIC_UUID           "7a991117-a277-46ae-8d73-0a7e7e6ae7e8"
+#define MW4_BLE_TEXT_DISPLAY_BRIGHTNESS_CHARACTERISTIC_UUID           "48387eca-eedf-40ee-ab37-b4fb3a18cdf1"
+#define MW4_BLE_TEXT_DISPLAY_FG_COLOR_CHARACTERISTIC_UUID             "4119bf67-6295-4ec9-b596-5b32a3f2fda5"
+#define MW4_BLE_TEXT_DISPLAY_BG_COLOR_CHARACTERISTIC_UUID             "1b56faa0-376a-432a-a79a-e1a4f12dd493"
