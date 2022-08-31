@@ -2,9 +2,7 @@
 
 #include <bitset>
 
-#include <BLEDevice.h>
-#include <BLEUtils.h>
-#include <BLEServer.h>
+#include <NimBLEDevice.h>
 
 #include "config.h"
 

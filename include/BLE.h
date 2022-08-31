@@ -2,13 +2,14 @@
 
 #include <string>
 
-#include <BLEServer.h>
+#include <NimBLEDevice.h>
 
 class BLECharacteristic;
 class BLEService;
 class BLEUUID;
 
 static bool deviceConnected = false;
+static bool oldDeviceConnected = false;
 
 BLEServer* setupBLE();
 

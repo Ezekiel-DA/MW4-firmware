@@ -1,36 +1,25 @@
 #include "BLE.h"
 
 #include <Arduino.h>
-#include <BLEDevice.h>
-#include <BLEUtils.h>
-#include <BLEServer.h>
-#include <BLE2904.h>
-#include <BLE2902.h>
+#include <NimBLEDevice.h>
 
 #include "config.h"
 
 BLEServer* setupBLE() {
   BLEDevice::init("MagicWheelchair-Savannah");
+  NimBLEDevice::setMTU(517);
+
   BLEServer* server = BLEDevice::createServer();
   server->setCallbacks(new ServerCallbacks());
 
-  BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
-  pAdvertising->setAppearance(0x0CC1); // powered wheelchair appearance
-  pAdvertising->setScanResponse(true);
-  pAdvertising->setMinPreferred(0x06); // functions that help with iPhone connections issue // NLV: what the heck is this? Taken from the ESP32 samples, should probably test what "iPhone issue" it's talking about...
-  pAdvertising->setMinPreferred(0x12);
-
-  BLEDevice::startAdvertising();
   Serial.println("BLE init complete.");
 
   return server;
 }
 
 void attachUserDescriptionToCharacteristic(BLECharacteristic* iCharacteristic, const std::string& iName) {
-  BLEDescriptor* descriptor = new BLEDescriptor((uint16_t)ESP_GATT_UUID_CHAR_DESCRIPTION, 15);
+  auto descriptor = iCharacteristic->createDescriptor("2901", NIMBLE_PROPERTY::READ);
   descriptor->setValue(iName);
-
-  iCharacteristic->addDescriptor(descriptor);
 }
 
 void setCharacteristicPresentationFormat(BLECharacteristic* iCharacteristic, uint8_t iType) {
@@ -56,5 +45,5 @@ void ServerCallbacks::onConnect(BLEServer* server) {
 void ServerCallbacks::onDisconnect(BLEServer* server) {
   deviceConnected = false;
   Serial.println("Central disconnected; Advertising again...");
-  BLEDevice::startAdvertising();
+  //BLEDevice::startAdvertising();
 }

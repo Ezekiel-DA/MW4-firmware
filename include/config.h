@@ -14,7 +14,7 @@
 #define MW4_BLE_STATE_CHARACTERISTIC_UUID                        "c2af353b-e5fc-4bdf-b743-5d226f1198a2"
 #define MW4_BLE_MODE_CHARACTERISTIC_UUID                         "b54fc13b-4374-4a6f-861f-dd198f88f299"
 #define MW4_BLE_CYCLE_COLOR_CHARACTERISTIC_UUID                  "dfe34849-2d42-4222-b6b1-617a4f4d0869"
-#define MW4_BLE_HUE_CHARACTERISTIC_UUID                          "19dfe175-aa12-404b-843d-b625937cffff"
+#define MW4_BLE_HUE_CHARACTERISTIC_UUID                          "19dfe175-aa12-404b-843d-b625937cffff" 
 #define MW4_BLE_SATURATION_CHARACTERISTIC_UUID                   "946d22e6-2b2f-49e7-b941-150b023f2261"
 #define MW4_BLE_VALUE_CHARACTERISTIC_UUID                        "6c5df188-2e69-4f2f-b4ab-9d2b76ef7aa9"
 #define MW4_BLE_ADDRESSABLE_DATA_CHARACTERISTIC_UUID             "8d4510e9-8565-49a4-8813-f45f49061833"

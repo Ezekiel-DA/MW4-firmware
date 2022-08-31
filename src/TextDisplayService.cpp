@@ -1,11 +1,8 @@
 #include "TextDisplayService.h"
 
 #include <Arduino.h>
-#include <BLEDevice.h>
-#include <BLEUtils.h>
-#include <BLEServer.h>
-#include <BLE2904.h>
-#include <BLE2902.h>
+#include <NimBLEDevice.h>
+
 
 #define FONT_6x8_FIXED_MEDIUM
 #include <StripDisplay.h>
@@ -25,74 +22,57 @@ TextDisplayService::TextDisplayService(BLEServer* iServer, const std::string& iD
   FastLED.setBrightness(this->_brightness);
   strip.setup(fontP);
 
-  std::string serviceUUID = MW4_BLE_TEXT_DISPLAY_SERVICE_UUID;
-  _service = iServer->createService(serviceUUID, 60);
+  _service = iServer->createService(MW4_BLE_TEXT_DISPLAY_SERVICE_UUID);
 
-  BLECharacteristic* frontPanelText = _service->createCharacteristic(MW4_BLE_TEXT_DISPLAY_TEXT_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE |BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_INDICATE);
+  BLECharacteristic* frontPanelText = _service->createCharacteristic(MW4_BLE_TEXT_DISPLAY_TEXT_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE |NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::INDICATE);
   frontPanelText->setCallbacks(this);
   frontPanelText->setValue(this->_text);
   attachUserDescriptionToCharacteristic(frontPanelText, "Front text");
-  frontPanelText->addDescriptor(new BLE2902());
 
-  BLECharacteristic* frontPanelOffset = _service->createCharacteristic(MW4_BLE_TEXT_DISPLAY_OFFSET_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE |BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_INDICATE);
+  BLECharacteristic* frontPanelOffset = _service->createCharacteristic(MW4_BLE_TEXT_DISPLAY_OFFSET_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE |NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::INDICATE);
   frontPanelOffset->setCallbacks(this);
   frontPanelOffset->setValue((uint16_t&) this->_offset);
   attachUserDescriptionToCharacteristic(frontPanelOffset, "Text offset");
-  frontPanelOffset->addDescriptor(new BLE2902());
 
-  BLECharacteristic* frontPanelCustomizeOffset = _service->createCharacteristic(MW4_BLE_TEXT_DISPLAY_SCROLLING_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE |BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_INDICATE);
+  BLECharacteristic* frontPanelCustomizeOffset = _service->createCharacteristic(MW4_BLE_TEXT_DISPLAY_SCROLLING_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE |NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::INDICATE);
   frontPanelCustomizeOffset->setCallbacks(this);
   frontPanelCustomizeOffset->setValue(reinterpret_cast<uint8_t*>(&(this->_scrolling)), 1);
   attachUserDescriptionToCharacteristic(frontPanelCustomizeOffset, "Scrolling");
-  frontPanelCustomizeOffset->addDescriptor(new BLE2902());
 
-  BLECharacteristic* scrollSpeed = _service->createCharacteristic(MW4_BLE_TEXT_DISPLAY_SCROLL_SPEED_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE |BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_INDICATE);
+  BLECharacteristic* scrollSpeed = _service->createCharacteristic(MW4_BLE_TEXT_DISPLAY_SCROLL_SPEED_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE |NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::INDICATE);
   scrollSpeed->setCallbacks(this);
   scrollSpeed->setValue(&(this->_scrollSpeed), 1);
   attachUserDescriptionToCharacteristic(scrollSpeed, "Scroll speed");
-  scrollSpeed->addDescriptor(new BLE2902());
 
-  BLECharacteristic* pauseTime = _service->createCharacteristic(MW4_BLE_TEXT_DISPLAY_PAUSE_TIME_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE |BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_INDICATE);
+  BLECharacteristic* pauseTime = _service->createCharacteristic(MW4_BLE_TEXT_DISPLAY_PAUSE_TIME_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE |NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::INDICATE);
   pauseTime->setCallbacks(this);
   pauseTime->setValue(&(this->_pauseTime), 1);
   attachUserDescriptionToCharacteristic(pauseTime, "Pause time");
-  pauseTime->addDescriptor(new BLE2902()); 
 
-  BLECharacteristic* frontPanelBrightness = _service->createCharacteristic(MW4_BLE_TEXT_DISPLAY_BRIGHTNESS_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE |BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_INDICATE);
+  BLECharacteristic* frontPanelBrightness = _service->createCharacteristic(MW4_BLE_TEXT_DISPLAY_BRIGHTNESS_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE |NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::INDICATE);
   frontPanelBrightness->setCallbacks(this);
   frontPanelBrightness->setValue(&(this->_brightness), 1);
   attachUserDescriptionToCharacteristic(frontPanelBrightness, "Brightness");
-  frontPanelBrightness->addDescriptor(new BLE2902());
 
-  BLECharacteristic* fgColor = _service->createCharacteristic(MW4_BLE_TEXT_DISPLAY_FG_COLOR_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE |BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_INDICATE);
+  BLECharacteristic* fgColor = _service->createCharacteristic(MW4_BLE_TEXT_DISPLAY_FG_COLOR_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE |NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::INDICATE);
   fgColor->setCallbacks(this);
   fgColor->setValue(this->_fgColor, 3);
   attachUserDescriptionToCharacteristic(fgColor, "Text color");
-  fgColor->addDescriptor(new BLE2902());
 
-   BLECharacteristic* bgColor = _service->createCharacteristic(MW4_BLE_TEXT_DISPLAY_BG_COLOR_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE |BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_INDICATE);
+   BLECharacteristic* bgColor = _service->createCharacteristic(MW4_BLE_TEXT_DISPLAY_BG_COLOR_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE |NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::INDICATE);
   bgColor->setCallbacks(this);
   bgColor->setValue(this->_bgColor, 3);
   attachUserDescriptionToCharacteristic(bgColor, "Bg. color");
-  bgColor->addDescriptor(new BLE2902());
-
-  _service->start();
 
   Serial.println("Text Display init complete.");
 }
 
 void TextDisplayService::onWrite(BLECharacteristic* characteristic) {
     BLEUUID id = characteristic->getUUID();
-      
-    // std:array<uint8_t>
-    auto data = characteristic->getData();
 
-    // Serial.print("New value from central: ");
-    // for (uint8_t i = 0; i < characteristic->getLength(); ++i) {
-    //   Serial.print(data[i]); Serial.print(" ");
-    // }
-    // Serial.println(" EOD");
-
+    std::string safeData = characteristic->getValue();
+    uint8_t* data = (uint8_t*)safeData.data();  
+    
     if (id.equals(std::string(MW4_BLE_TEXT_DISPLAY_TEXT_CHARACTERISTIC_UUID))) {
       std::string val = characteristic->getValue();
       // Serial.print("New text: "); Serial.println(val.c_str());

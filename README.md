@@ -38,7 +38,7 @@ The costume can receive Over-The-Air updates via BLE from the companion app.
 To trigger an update, the process is as follows:
 * Look for the device as usual by querying for the advertised Costume Controller service
 * Query the FW version characteristic of this service to check the current version
-* Check this version against some reference, e.g. the `deployment.json` file stored in S3 at <REDACTED>. Format to be nailed down later...
+* Check this version against some reference, e.g. the `deployment.json` file stored in S3 at `<REDACTED>`. Format to be nailed down later...
 * If version checks passes, download the corresponding firmware file, e.g.: ``http://${manifest.host}${manifest.bin}`` where manifest is the parsed JSON file from above.
 * Cut up the firmware file into 512 byte chunks
 

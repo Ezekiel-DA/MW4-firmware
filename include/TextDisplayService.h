@@ -1,6 +1,6 @@
 #pragma once
 
-#include <BLEDevice.h>
+#include <NimBLEDevice.h>
 
 class BLEService;
 
@@ -12,7 +12,7 @@ class BLEService;
 
 class TextDisplayService : public BLECharacteristicCallbacks {
 private:
-  BLEService* _service = nullptr;
+  
 
 public:
   TextDisplayService(BLEServer* iServer, const std::string& iDefaultText);
@@ -20,6 +20,8 @@ public:
   void update();
   
   void onWrite(BLECharacteristic* characteristic);
+
+  BLEService* _service = nullptr;
 
   std::string _text;
   bool _scrolling = true;
