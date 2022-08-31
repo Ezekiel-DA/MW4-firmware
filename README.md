@@ -7,7 +7,8 @@ This service is advertised as `MW4_BLE_COSTUME_CONTROL_SERVICE_UUID`. Centrals (
 
 The following characteristics exist:
 * `MW4_BLE_COSTUME_CONTROL_FW_VERSION_CHARACTERISTIC_UUID`: 1 byte unsigned int representing the version of the currently installed firmware
-* `MW4_BLE_COSTUME_CONTROL_OTA_CHARACTERISTIC_UUID`: 512 byte writable buffer to transfer new firmare; see below
+* `MW4_BLE_COSTUME_CONTROL_OTA_DATA_CHARACTERISTIC_UUID`: write only byte buffer (up to 512? But probably don't and use ~500?) to send FW data OTA
+* `MW4_BLE_COSTUME_CONTROL_OTA_CONTROL_CHARACTERISTIC_UUID`: 1 byte unsigned int control data for the OTA process; see below
 
 ## Text display service
 The `MW4_BLE_TEXT_DISPLAY_SERVICE_UUID` service controls the front panel text. The following characteristics exist:
@@ -33,14 +34,24 @@ TODO: adopt this from MWNext project.
 # OTA updates
 
 ## Principle
-The costume can receive Over-The-Air updates via BLE from the companion app.
+The costume can receive Over-The-Air updates via BLE from the companion app. To do this, we use two characteristics on the Costume Controller service: one to transmit data, one for control messages.
 
-To trigger an update, the process is as follows:
+Actual byte values for control messages can be found in `config.h`; they'll be refered to by name here.
+
+To trigger an update, the process from the central (e.g. iOS app) is as follows:
 * Look for the device as usual by querying for the advertised Costume Controller service
 * Query the FW version characteristic of this service to check the current version
 * Check this version against some reference, e.g. the `deployment.json` file stored in S3 at `<REDACTED>`. Format to be nailed down later...
 * If version checks passes, download the corresponding firmware file, e.g.: ``http://${manifest.host}${manifest.bin}`` where manifest is the parsed JSON file from above.
-* Cut up the firmware file into 512 byte chunks
+* Cut up the firmware file into ~500 byte chunks (query device MTU if possible? Or should we pass this info somehow?)
+* Begin the OTA process by sending the `OTA_CONTROL_START` message on the control characteristic
+* Wait for the device to acknowledge that the OTA process is ready, which it does by setting the control characteristic to `OTA_CONTROL_ACK`
+* Clear the control characteristic to `OTA_CONTROL_NOP`
+* Loop over sending the chunks by writing to the data characteristic
+* Once done, notify the device that the OTA upload is complete by settign the control characteristic to `OTA_CONTROL_END`
+* TODO: should the device ACK this? Should the central do something in response? Probably doesn't matter since the device is about to reboot... assuming everything went okay.
+
+TODO: this could probably use some sort of error handling, but the ESP32 SDK should have our back for most failure cases and should at worst recover on a reboot?
 
 ## Manifest file
 Structure of `deployment.json`:

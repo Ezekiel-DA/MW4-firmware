@@ -30,6 +30,6 @@ BLECharacteristic* getCharacteristicByUUID(BLEService* iService, BLEUUID iCharac
 
 
 class ServerCallbacks: public BLEServerCallbacks {
-  void onConnect(BLEServer* server);
+  void onConnect(BLEServer* server, ble_gap_conn_desc* desc);
   void onDisconnect(BLEServer* server);
 };

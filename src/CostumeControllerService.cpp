@@ -25,8 +25,11 @@ CostumeControlService::CostumeControlService(BLEServer* iServer, uint8_t iVersio
   fwVersion->setValue(&(this->_fwVersion), 1);
   attachUserDescriptionToCharacteristic(fwVersion, "FW version");
 
-  BLECharacteristic* otaUpload = _service->createCharacteristic(MW4_BLE_COSTUME_CONTROL_OTA_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::WRITE |NIMBLE_PROPERTY::NOTIFY);
-  otaUpload->setCallbacks(this);
+  BLECharacteristic* otaData = _service->createCharacteristic(MW4_BLE_COSTUME_CONTROL_OTA_DATA_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::WRITE);
+  otaData->setCallbacks(this);
+
+  BLECharacteristic* otaControl = _service->createCharacteristic(MW4_BLE_COSTUME_CONTROL_OTA_CONTROL_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
+  otaControl->setCallbacks(this);
 
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
   pAdvertising->addServiceUUID(_service->getUUID());
@@ -34,39 +37,66 @@ CostumeControlService::CostumeControlService(BLEServer* iServer, uint8_t iVersio
   Serial.println("Costume Controller init complete.");
 }
 
+void acknowledgeControlMessage(BLECharacteristic* characteristic) {
+  uint8_t res = OTA_CONTROL_ACK;
+  characteristic->setValue(&res, 1);
+  characteristic->notify();
+}
+
 void CostumeControlService::onWrite(BLECharacteristic* characteristic) {
-  std::string data = characteristic->getValue();
+  std::string safeData = characteristic->getValue();
+  uint8_t* data = (uint8_t*)safeData.data();  
 
-  if (!updateInProgress) {
-    Serial.println("Starting BLE OTA update");
+  BLEUUID id = characteristic->getUUID();
+    
+  if (id.equals(std::string(MW4_BLE_COSTUME_CONTROL_OTA_CONTROL_CHARACTERISTIC_UUID))) {
+    switch (*data) {
+      case OTA_CONTROL_START:
+        Serial.println("Got OTA START control message");
+        assert(!updateInProgress);
+        updateInProgress = true;
 
-    // prevent BLE connections from timing out while we're busy with esp_ota_begin, which is pretty slow
-    // esp_task_wdt_init(10, false);
-    // vTaskDelay(5);
+        // this supposedly helps prevent the BLE central from disconnecting while we perform esp_ota_begin, which is pretty slow?
+        esp_task_wdt_init(10, false);
+        vTaskDelay(5);
 
-    esp_ota_begin(esp_ota_get_next_update_partition(NULL), OTA_SIZE_UNKNOWN, &otaHandle);
-    updateInProgress = true;
-  }
+        if (esp_ota_begin(esp_ota_get_next_update_partition(NULL), OTA_SIZE_UNKNOWN, &otaHandle) != ESP_OK) {
+          Serial.println("esp_ota_begin failed?!");
+          assert(false);
+        }
 
-  esp_ota_write(otaHandle, data.c_str(), data.length());
+        acknowledgeControlMessage(characteristic);
+        break;
+      case OTA_CONTROL_END:
+      Serial.println("Got OTA END control message");
+        assert(updateInProgress);
+        updateInProgress = false;
 
-  // TODO: if we don't receive another BLE OTA packet for a while, we should probably esp_ota_abort here, to free memory allocated by esp_ota_begin
+        esp_ota_end(otaHandle);
+        otaHandle = 0;
 
-  if (data.length() != BLE_MAX_CHARACTERISTIC_SIZE) { // message was smaller than max possible size; we must have reached the end of the firmware upload
-    // NB: what happens in the unlikely event that our firware size is exactly % 512?
-    esp_ota_end(otaHandle);
-    Serial.println("BLE OTA download complete.");
-    if (ESP_OK == esp_ota_set_boot_partition(esp_ota_get_next_update_partition(NULL))) {
-      Serial.println("Restarting...");
-      delay(2000);
-      esp_restart();
+        acknowledgeControlMessage(characteristic);
+
+        Serial.println("BLE OTA download complete.");
+        if (ESP_OK == esp_ota_set_boot_partition(esp_ota_get_next_update_partition(NULL))) {
+          Serial.println("Restarting...");
+          delay(2000);
+          esp_restart();
+        } else {
+          Serial.println("!!BLE OTA failure!!");
+          assert(false);
+        }
+      default:
+        //
+        break;
+    }
+  } else if (id.equals(std::string(MW4_BLE_COSTUME_CONTROL_OTA_DATA_CHARACTERISTIC_UUID))) {
+    if (!updateInProgress) {
+      Serial.println("Got OTA DATA while not performing OTA");
+      // TODO: one day, we should probably use this to signal the buffer size from the central?
     } else {
-      Serial.println("!!BLE OTA failure!!");
+      assert(otaHandle);
+      esp_ota_write(otaHandle, data, safeData.length());
     }
   }
-
-  // touch the characteristic, so that the central gets a notification and knows to push the next chunk of firmware
-  uint8_t notification[2] = {4, 2};
-  characteristic->setValue(notification, 2);
-  characteristic->notify();
 }

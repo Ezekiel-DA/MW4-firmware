@@ -28,7 +28,7 @@ public:
   uint8_t _scrollSpeed = 50;
   uint8_t _pauseTime = 3;
   int16_t _offset = 0;
-  uint8_t _brightness = 50;
+  uint8_t _brightness = 10;
 
   uint8_t _fgColor[3] = {255, 255, 255};
   uint8_t _bgColor[3] = {0, 0, 0};

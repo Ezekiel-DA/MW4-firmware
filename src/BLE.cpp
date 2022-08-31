@@ -37,7 +37,22 @@ BLECharacteristic* getCharacteristicByUUID(BLEService* iService, BLEUUID iCharac
   return characteristic;
 }
 
-void ServerCallbacks::onConnect(BLEServer* server) {
+void ServerCallbacks::onConnect(BLEServer* server, ble_gap_conn_desc* desc) {
+  esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_CONN_HDL0, ESP_PWR_LVL_P9);
+  esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_CONN_HDL1, ESP_PWR_LVL_P9);
+  esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_DEFAULT, ESP_PWR_LVL_P9);
+  esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_P9);
+
+  // Taken from https://github.com/ClaesClaes/Arduino-ESP32-NimBLE-OTA-iOS-SwiftUI
+  // I can't seem to find what the defaults for ESP32 are but they are NOT enough for our OTA over BLE use case with iOS: CoreBluetooth will
+  // give up on the connection during esp_ota_begin >.< These values appear to help.
+  //
+  // Units:
+  // Min/Max Intervals: 1.25 millisecond increments.
+  // Latency: number of intervals allowed to skip.
+  // Timeout: 10 millisecond increments, try for 5x interval time for best results.
+  server->updateConnParams(desc->conn_handle, /*min conn interval*/12, /*max conn interval*/12, /*latency*/2, /*timeout*/100);
+
   deviceConnected = true;
   Serial.println("Central connected. Start sending updates.");
 }

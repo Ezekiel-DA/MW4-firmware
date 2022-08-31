@@ -5,7 +5,15 @@
 // the advertised service, allowing clients to find us
 #define MW4_BLE_COSTUME_CONTROL_SERVICE_UUID                      "47191881-ebb3-4a9f-9645-3a5c6dae4900"
 #define MW4_BLE_COSTUME_CONTROL_FW_VERSION_CHARACTERISTIC_UUID    "55cf24c7-7a28-4df4-9b53-356b336bab71"
-#define MW4_BLE_COSTUME_CONTROL_OTA_CHARACTERISTIC_UUID         	"1083b9a4-fdc0-4aa6-b027-a2600c8837c4"
+#define MW4_BLE_COSTUME_CONTROL_OTA_DATA_CHARACTERISTIC_UUID      "1083b9a4-fdc0-4aa6-b027-a2600c8837c4"
+#define MW4_BLE_COSTUME_CONTROL_OTA_CONTROL_CHARACTERISTIC_UUID   "d1627dbe-b6ae-421f-b2eb-5878576410c0"
+
+#define OTA_CONTROL_NOP   0x00
+#define OTA_CONTROL_ACK   0x01
+#define OTA_CONTROL_NACK  0x02
+#define OTA_CONTROL_START 0x04
+#define OTA_CONTROL_END   0x08
+#define OTA_CONTROL_ERR   0xFF
 
 // Light controlling services; multiple instances allowed
 #define MW4_BLE_LIGHT_DEVICE_SERVICE_UUID                        "0ba35e90-f55f-4f15-9347-3dc4a0287881"
