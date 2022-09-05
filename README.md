@@ -113,3 +113,8 @@ Enable static website mode in bucket Properties (just use index.html as the inde
 Build URLs for files in the bucket based on the Bucket website endpoint given in the bucket properties.
 
 NB: don't forget to set metadata on objects in the metadata to give them `Cache-Control: no-cache`. There doesn't seem to be a good way to automate this easily, and this is lost on uploads of new versions, unfortunately.
+
+# NimBLE migration notes
+Migrating away from Bluedroid seems to improve stability and lower flash memory usage (at the cost of a negligible increase in RAM usage).
+
+Worth noting: NimBLE seems to be significantly better at managing handles for characteristics etc. With Bluedroid, it was necessary to increase handles on service creation.

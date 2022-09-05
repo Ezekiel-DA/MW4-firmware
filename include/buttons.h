@@ -3,31 +3,36 @@
 #include <AceButton.h>
 using namespace ace_button;
 
-ButtonConfig rfidButtonConfig;
-AceButton rfidButton(&rfidButtonConfig);
+ButtonConfig mainButtonConfig;
+AceButton mainButton(&mainButtonConfig);
 
-bool rfidWrite = false;
+// TODO move this sort of global costume state somewhere logical...
+static bool altMode = false;
 
-void rfidButtonEventHandler(AceButton* button, uint8_t eventType, uint8_t buttonState)
+void timerCB(TimerHandle_t xTimer) {
+  altMode = false;
+}
+
+TimerHandle_t altModeResetTimerHandle = xTimerCreate("altModeResetTimer", pdMS_TO_TICKS(5000), /*make it one shot*/pdFALSE, 0, timerCB);
+
+void mainButtonEventHandler(AceButton* button, uint8_t eventType, uint8_t buttonState)
 {
   switch (eventType)
   {
     case AceButton::kEventPressed:
-      rfidWrite = true;
-      digitalWrite(STATUS_LED_PIN, HIGH);
       break;
     case AceButton::kEventReleased:
-      rfidWrite = false;
-      digitalWrite(STATUS_LED_PIN, LOW);
+      altMode = true;
+      xTimerStart(altModeResetTimerHandle, 0); // this will conveniently reset the timer if it was running
       break;
   }
 }
 
 void setupButtons()
 {
-  pinMode(0, INPUT_PULLUP);
-  rfidButton.init((uint8_t)0);
-  rfidButtonConfig.setEventHandler(rfidButtonEventHandler);
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  mainButton.init((uint8_t)0);
+  mainButtonConfig.setEventHandler(mainButtonEventHandler);
 }
 
 void checkButtons()
@@ -37,7 +42,7 @@ void checkButtons()
   uint16_t now = millis();
   if ((uint16_t)(now - prev) >= 5)
   {
-    rfidButton.check();
+    mainButton.check();
     prev = now;
   }
 }

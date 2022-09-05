@@ -9,12 +9,15 @@ using namespace ace_button;
 #include "BLE.h"
 #include "CostumeControllerService.h"
 #include "TextDisplayService.h"
-#include "LightService.h"
+#include "LightDeviceService.h"
 
 #define FW_VERSION 1
 
 CostumeControlService* costumeController = nullptr;
 TextDisplayService* frontText = nullptr;
+LightDeviceService* frontStrip = nullptr;
+LightDeviceService* backStrip = nullptr;
+LightDeviceService* racetrackStrip = nullptr;
 
 void setup()
 {
@@ -29,9 +32,18 @@ void setup()
 
   costumeController = new CostumeControlService(bleServer, FW_VERSION);
   frontText = new TextDisplayService(bleServer, "I WANT YOU");
+  frontStrip = new LightDeviceService(bleServer, 200, "Front strip");
+  addLEDsToLightDeviceService<FRONT_STRIP_PIN>(frontStrip);
+  backStrip = new LightDeviceService(bleServer, 400, "Back strip");
+  addLEDsToLightDeviceService<BACK_STRIP_PIN>(backStrip);
+  racetrackStrip = new LightDeviceService(bleServer, 300, "Racetrack");
+  addLEDsToLightDeviceService<RACETRACK_STRIP_PIN>(racetrackStrip);
 
-  costumeController->_service->start();
-  frontText->_service->start();
+  costumeController->service->start();
+  frontText->service->start();
+  frontStrip->service->start();
+  backStrip->service->start();
+  racetrackStrip->service->start();
 
   BLEDevice::startAdvertising();
 
@@ -41,6 +53,12 @@ void setup()
 void loop()
 {
   checkButtons();
+
+  if (altMode) {
+    digitalWrite(STATUS_LED_PIN, HIGH);
+  } else {
+    digitalWrite(STATUS_LED_PIN, LOW);
+  }
 
   if (!deviceConnected && oldDeviceConnected) {
     delay(100);
@@ -54,4 +72,9 @@ void loop()
   }
 
   frontText->update();
+  frontStrip->update();
+  backStrip->update();
+  racetrackStrip->update();
+
+  FastLED.show();
 }

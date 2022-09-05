@@ -19,20 +19,20 @@ esp_ota_handle_t otaHandle = 0;
 
 CostumeControlService::CostumeControlService(BLEServer* iServer, uint8_t iVersion) : _fwVersion(iVersion) {
   std::string serviceUUID = MW4_BLE_COSTUME_CONTROL_SERVICE_UUID;
-  _service = iServer->createService(serviceUUID);
+  service = iServer->createService(serviceUUID);
 
-  BLECharacteristic* fwVersion = _service->createCharacteristic(MW4_BLE_COSTUME_CONTROL_FW_VERSION_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ);
+  BLECharacteristic* fwVersion = service->createCharacteristic(MW4_BLE_COSTUME_CONTROL_FW_VERSION_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ);
   fwVersion->setValue(&(this->_fwVersion), 1);
   attachUserDescriptionToCharacteristic(fwVersion, "FW version");
 
-  BLECharacteristic* otaData = _service->createCharacteristic(MW4_BLE_COSTUME_CONTROL_OTA_DATA_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::WRITE);
+  BLECharacteristic* otaData = service->createCharacteristic(MW4_BLE_COSTUME_CONTROL_OTA_DATA_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::WRITE);
   otaData->setCallbacks(this);
 
-  BLECharacteristic* otaControl = _service->createCharacteristic(MW4_BLE_COSTUME_CONTROL_OTA_CONTROL_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
+  BLECharacteristic* otaControl = service->createCharacteristic(MW4_BLE_COSTUME_CONTROL_OTA_CONTROL_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
   otaControl->setCallbacks(this);
 
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
-  pAdvertising->addServiceUUID(_service->getUUID());
+  pAdvertising->addServiceUUID(service->getUUID());
 
   Serial.println("Costume Controller init complete.");
 }
@@ -57,6 +57,7 @@ void CostumeControlService::onWrite(BLECharacteristic* characteristic) {
         updateInProgress = true;
 
         // this supposedly helps prevent the BLE central from disconnecting while we perform esp_ota_begin, which is pretty slow?
+        // not sure it actually does anything, the connection settings elsewhere seem more important.
         esp_task_wdt_init(10, false);
         vTaskDelay(5);
 

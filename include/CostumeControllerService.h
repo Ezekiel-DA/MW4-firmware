@@ -13,7 +13,7 @@ public:
   
   void onWrite(BLECharacteristic* characteristic);
 
-  BLEService* _service = nullptr;
+  BLEService* service = nullptr;
 
 private:
   uint8_t _fwVersion;

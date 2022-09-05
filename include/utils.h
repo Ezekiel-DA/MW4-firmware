@@ -1,14 +1,6 @@
 # pragma once
 
-#include "config.h"
+#include <FastLED.h>
 
-void pulseStatusLED() {
-  for (uint8_t i = 0; i < 4; ++i)
-      {
-        digitalWrite(STATUS_LED_PIN, LOW);
-        delay(50);
-        digitalWrite(STATUS_LED_PIN, HIGH);
-        delay(50);
-      }
-      digitalWrite(STATUS_LED_PIN, LOW);
-}
+void setAllLEDs(CRGB c, CRGB* strip, uint16_t numLeds);
+void setAllLEDs(CHSV c, CRGB* strip, uint16_t numLeds);
