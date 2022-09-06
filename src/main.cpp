@@ -71,7 +71,7 @@ void loop()
     oldDeviceConnected = deviceConnected;
   }
 
-  frontText->update();
+  frontText->update(altMode);
   frontStrip->update();
   backStrip->update();
   racetrackStrip->update();

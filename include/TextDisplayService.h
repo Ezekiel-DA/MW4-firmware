@@ -27,7 +27,7 @@ class TextDisplayService : public BLECharacteristicCallbacks {
 public:
   TextDisplayService(BLEServer* iServer, const std::string& iDefaultText);
 
-  void update();
+  void update(bool iAltMode);
   
   void onWrite(BLECharacteristic* characteristic);
 
@@ -40,7 +40,7 @@ private:
   CRGB leds[STRIPLED_W * STRIPLED_H];
   StripDisplay* strip;
 
-  void createBLECharacteristics(TextDisplayServiceSettings& settings);
+  void createBLECharacteristics(TextDisplayServiceSettings& settings, bool iAltMode=false);
 
-  BLECharacteristic* createCharacteristic(const char* iDisplayName, const char* uuid);
+  BLECharacteristic* createCharacteristic(const char** uuids, const char* iDisplayName, bool iAltMode=false);
 };
