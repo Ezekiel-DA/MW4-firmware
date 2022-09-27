@@ -3,6 +3,8 @@
 #include <AceButton.h>
 using namespace ace_button;
 
+#include "MusicService.h"
+
 ButtonConfig mainButtonConfig;
 AceButton mainButton(&mainButtonConfig);
 
@@ -20,6 +22,7 @@ void mainButtonEventHandler(AceButton* button, uint8_t eventType, uint8_t button
   switch (eventType)
   {
     case AceButton::kEventPressed:
+      audioConnecttoSD("/taylor_swift_shake_it_off.mp3");
       break;
     case AceButton::kEventReleased:
       altMode = true;

@@ -28,6 +28,7 @@ public:
   TextDisplayService(BLEServer* iServer, const std::string& iDefaultText);
 
   void update(bool iAltMode);
+  void nonBlockingUpdate(bool iAltMode);
   
   void onWrite(BLECharacteristic* characteristic);
 
