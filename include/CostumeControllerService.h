@@ -15,6 +15,8 @@ public:
 
   BLEService* service = nullptr;
 
+  bool dangerZone = false;
+
 private:
   uint8_t _fwVersion;
 };

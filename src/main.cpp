@@ -47,13 +47,14 @@ void setup()
   addLEDsToTextDisplayService<FRONT_TEXT_PIN>(frontText);
   racetrackStrip = new LightDeviceService(bleServer, 300, "Racetrack");
   addLEDsToLightDeviceService<RACETRACK_STRIP_PIN>(racetrackStrip);
-  bottomVStrip = new LightDeviceService(bleServer, 5, "Bottom V");
+  bottomVStrip = new LightDeviceService(bleServer, 20, "Bottom V");
   addLEDsToLightDeviceService<BOTTOM_V_PIN>(bottomVStrip);
   frontUStrip = new LightDeviceService(bleServer, 120, "Front U");
   addLEDsToLightDeviceService<FRONT_U_PIN>(frontUStrip);
   backUStrip = new LightDeviceService(bleServer, 120, "Back U");
   addLEDsToLightDeviceService<BACK_U_PIN>(backUStrip);
   backScreenStrip = new LightDeviceService(bleServer, 200, "Back screen");
+  backScreenStrip->mode = 0; // steady
   addLEDsToLightDeviceService<BACK_SCREEN_PIN>(backScreenStrip);
   pedestalStrip = new LightDeviceService(bleServer, 300, "Pedestal");
   addLEDsToLightDeviceService<PEDESTAL_PIN>(pedestalStrip);
@@ -95,6 +96,10 @@ void loop()
   if (deviceConnected && !oldDeviceConnected) {
     Serial.println("main loop started");
     oldDeviceConnected = deviceConnected;
+  }
+
+  if (costumeController->dangerZone) {
+    Serial.println("danger");
   }
 
   LightDeviceService::globalAnimationUpdate();

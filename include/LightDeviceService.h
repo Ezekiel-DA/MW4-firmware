@@ -17,7 +17,7 @@ public:
 
   size_t numLEDs;
 
-  uint8_t mode = 1; // steady, pulse, rainbow? (which would override hue, obviously)
+  uint8_t mode = 1; // steady, pulse,  rainbow pulse, rainbow wave
   bool state = true; // on / off
   uint8_t hue = 255;
   uint8_t saturation = 0;

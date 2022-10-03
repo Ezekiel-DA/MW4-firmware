@@ -12,7 +12,6 @@
 
 static uint8_t _autoId = 1;
 
-static uint8_t pulseVal;
 static uint8_t colorCycle;
 
 LightDeviceService::LightDeviceService(BLEServer* iServer, const size_t& len, const std::string& iName, uint8_t iId) : numLEDs(len) {
@@ -77,13 +76,7 @@ void LightDeviceService::onWrite(BLECharacteristic* characteristic) {
 void LightDeviceService::globalAnimationUpdate() {
   auto now = millis();
 
-  static auto lastPulseUpdate = millis();
   static auto lastRainbowUpdate = millis();
-
-  if (now - lastPulseUpdate > 40) {
-    ++pulseVal;
-    lastPulseUpdate = now;
-  }
 
   if (now - lastRainbowUpdate > 100) {
     ++colorCycle;
@@ -109,25 +102,22 @@ void LightDeviceService::update(bool iAltMode) {
   prevUpdate = now;
 
   if (this->state == false) {
-    setAllLEDs(CRGB::Black, this->leds, this->numLEDs);
+    fill_solid(this->leds, this->numLEDs, CRGB::Black);
   } else {
     switch (this->mode) {
       case 0: // steady
-        setAllLEDs(CHSV(this->hue, this->saturation, this->value), this->leds, this->numLEDs);
+        fill_solid(this->leds, this->numLEDs, CHSV(this->hue, this->saturation, this->value));
         break;
       case 1: // pulse
       {
-        // pulse logic:
-        // cycle through FastLED's quadwave8, a slightly squashed sinusoid
-        // scale8 by this->value, usually our "brightness" setting, but here our "max brightness" instead
-        // saturating add a little bit of brightness to get the bottom of the curve up and away from "lights off", which looks ugly (and flickers)
-        auto val = scale8(quadwave8(pulseVal), this->value);
-        val = qadd8(val, 20);
-        setAllLEDs(CHSV(this->hue, this->saturation, val), this->leds, this->numLEDs);
+        setAllLEDs(CHSV(this->hue, this->saturation, beatsin8(20, 20, this->value)), this->leds, this->numLEDs);
         break;
       }
-      case 2: // rainbow
-        setAllLEDs(CHSV(colorCycle, 255, this->value), this->leds, this->numLEDs);
+      case 2: // rainbow fill
+        fill_solid(this->leds, this->numLEDs, CHSV(colorCycle, 255, this->value));
+        break;
+      case 3: // rainbow wave
+        fill_rainbow(this->leds, this->numLEDs, beat8(5), 5);
         break;
     }
   }

@@ -31,6 +31,11 @@ CostumeControlService::CostumeControlService(BLEServer* iServer, uint8_t iVersio
   BLECharacteristic* otaControl = service->createCharacteristic(MW4_BLE_COSTUME_CONTROL_OTA_CONTROL_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
   otaControl->setCallbacks(this);
 
+  BLECharacteristic* dangerZone = service->createCharacteristic(MW4_BLE_COSTUME_CONTROL_DANGER_ZONE_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE);
+  dangerZone->setValue(reinterpret_cast<uint8_t*>(&(this->dangerZone)), 1);
+  dangerZone->setCallbacks(this);
+  attachUserDescriptionToCharacteristic(dangerZone, "PWR. LIMIT OVERRIDE");
+
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
   pAdvertising->addServiceUUID(service->getUUID());
 
@@ -99,5 +104,7 @@ void CostumeControlService::onWrite(BLECharacteristic* characteristic) {
       assert(otaHandle);
       esp_ota_write(otaHandle, data, safeData.length());
     }
+  } else if (id.equals(std::string(MW4_BLE_COSTUME_CONTROL_DANGER_ZONE_CHARACTERISTIC_UUID))) {
+    this->dangerZone = (bool) *data;
   }
 }
