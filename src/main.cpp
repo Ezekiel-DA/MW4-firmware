@@ -52,13 +52,15 @@ void setup()
 
   // To breathe an LED, make sure you set it as an
   // ANALOG_OUTPUT, so we can PWM the pin:
-  io.pinMode(SX1509_LED_PIN, ANALOG_OUTPUT);
+  //io.pinMode(SX1509_LED_PIN, ANALOG_OUTPUT);
+  io.pinMode(SX1509_LED_PIN, OUTPUT);
 
   // Breathe an LED: 1000ms LOW, 500ms HIGH,
   // 500ms to rise from low to high
   // 250ms to fall from high to low
   //io.breathe(SX1509_LED_PIN, 10, 10000, 1, 1);
-  io.blink(SX1509_LED_PIN, 5, 10);
+  //io.blink(SX1509_LED_PIN, 5, 10);
+  io.digitalWrite(SX1509_LED_PIN, HIGH);
 
   // TODO move the above (SWX1509 led setup)
 
@@ -119,7 +121,7 @@ void loop()
     oldDeviceConnected = deviceConnected;
   }
 
-  frontText->nonBlockingUpdate(altMode);
+  frontText->update(altMode);
   frontStrip->update();
   backStrip->update();
   racetrackStrip->update();

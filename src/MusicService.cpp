@@ -32,7 +32,7 @@ void audioTask(void *parameter) {
     struct audioMessage audioTxTaskMessage;
 
     audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
-    audio.setVolume(1); // 0...21
+    audio.setVolume(21); // 0...21
 
     while(true){
         if(xQueueReceive(audioSetQueue, &audioRxTaskMessage, 1) == pdPASS) {

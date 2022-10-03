@@ -16,7 +16,7 @@ struct TextDisplayServiceSettings {
   uint8_t scrollSpeed = 50;
   uint8_t pauseTime = 3;
   int16_t offset = 0;
-  uint8_t brightness = 25;
+  uint8_t brightness = 255;
 
   uint8_t fgColor[3] = {255, 255, 255};
   uint8_t bgColor[3] = {0, 0, 0};
@@ -28,7 +28,6 @@ public:
   TextDisplayService(BLEServer* iServer, const std::string& iDefaultText);
 
   void update(bool iAltMode);
-  void nonBlockingUpdate(bool iAltMode);
   
   void onWrite(BLECharacteristic* characteristic);
 

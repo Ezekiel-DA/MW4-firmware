@@ -68,21 +68,29 @@ void LightDeviceService::onWrite(BLECharacteristic* characteristic) {
     }
 }
 
-void LightDeviceService::update() {
-  if (this->state == false) {
-    setAllLEDs(CRGB::Black, this->leds, this->numLEDs);
-    return;
-  }
+void LightDeviceService::update(bool iAltMode) {
+  static uint16_t prev = millis();
 
-  switch (this->mode) {
-    case 0: // steady
-      setAllLEDs(CHSV(this->hue, this->saturation, this->value), this->leds, this->numLEDs);
-      break;
-    case 1: // pulse
-      //
-      break;
-    case 2: // rainbow
-      Serial.println("!! INVALID MODE RECEIVED !!");
-      break;
-  }
+  uint16_t now = millis();
+  if ((uint16_t)(now - prev) >= 50) { // TODO: move hardcoded ~30FPS elsewhere
+    if (this->state == false) {
+      setAllLEDs(CRGB::Black, this->leds, this->numLEDs);
+      return;
+    }
+
+    switch (this->mode) {
+      case 0: // steady
+        setAllLEDs(CHSV(this->hue, this->saturation, this->value), this->leds, this->numLEDs);
+        break;
+      case 1: // pulse
+      {
+        static uint8_t pulseVal = 0;
+        setAllLEDs(CHSV(this->hue, this->saturation, quadwave8(pulseVal++)), this->leds, this->numLEDs);
+        break;
+      }
+      case 2: // rainbow
+        Serial.println("!! INVALID MODE RECEIVED !!");
+        break;
+    }
+  }  
 }

@@ -106,46 +106,46 @@ void TextDisplayService::onWrite(BLECharacteristic* characteristic) {
     }
 }
 
+// void TextDisplayService::update(bool iAltMode) {
+//   static int16_t offset = STARTING_OFFSET;
+
+//   auto settingsToUse = !iAltMode ? this->settings : this->settingsAlt;
+
+//   FastLED.setBrightness(this->settings.brightness);
+
+//   auto text = settingsToUse.text;
+//   auto customOffset = settingsToUse.offset;
+//   auto isCustomOffsetOn = !settingsToUse.scrolling;
+//   int16_t centerPoint = (text.size() * 6) / 2;
+
+//   this->strip->setFgColor(CRGB(settingsToUse.fgColor[0], settingsToUse.fgColor[1], settingsToUse.fgColor[2]));
+//   this->strip->setBgColor(CRGB(settingsToUse.bgColor[0], settingsToUse.bgColor[1], settingsToUse.bgColor[2]));
+//   this->strip->setText(text.c_str());
+
+//   if (isCustomOffsetOn) {
+//     this->strip->displayText(customOffset);
+//   }
+//   else {
+//     this->strip->displayText(offset++);
+//     delay(settingsToUse.scrollSpeed);
+
+//     if (text.size() <= 10) { // only pause if text will fit
+//       if (offset == ((- STRIPLED_W / 2) + 1 + centerPoint))
+//       {
+//          // (TODO: put this in a task instead of blocking and using this hack?)
+//         FastLED.delay(settingsToUse.pauseTime * 1000); // FastLED.delay calls FastLED.show(), which we want here
+//       }
+//     }
+
+//     if (offset == text.size() * 6)
+//     {
+//       offset = STARTING_OFFSET;
+//     }
+//   }
+// }
+
+
 void TextDisplayService::update(bool iAltMode) {
-  static int16_t offset = STARTING_OFFSET;
-
-  auto settingsToUse = !iAltMode ? this->settings : this->settingsAlt;
-
-  FastLED.setBrightness(this->settings.brightness);
-
-  auto text = settingsToUse.text;
-  auto customOffset = settingsToUse.offset;
-  auto isCustomOffsetOn = !settingsToUse.scrolling;
-  int16_t centerPoint = (text.size() * 6) / 2;
-
-  this->strip->setFgColor(CRGB(settingsToUse.fgColor[0], settingsToUse.fgColor[1], settingsToUse.fgColor[2]));
-  this->strip->setBgColor(CRGB(settingsToUse.bgColor[0], settingsToUse.bgColor[1], settingsToUse.bgColor[2]));
-  this->strip->setText(text.c_str());
-
-  if (isCustomOffsetOn) {
-    this->strip->displayText(customOffset);
-  }
-  else {
-    this->strip->displayText(offset++);
-    delay(settingsToUse.scrollSpeed);
-
-    if (text.size() <= 10) { // only pause if text will fit
-      if (offset == ((- STRIPLED_W / 2) + 1 + centerPoint))
-      {
-         // (TODO: put this in a task instead of blocking and using this hack?)
-        FastLED.delay(settingsToUse.pauseTime * 1000); // FastLED.delay calls FastLED.show(), which we want here
-      }
-    }
-
-    if (offset == text.size() * 6)
-    {
-      offset = STARTING_OFFSET;
-    }
-  }
-}
-
-
-void TextDisplayService::nonBlockingUpdate(bool iAltMode) {
     static int16_t offset = STARTING_OFFSET;
     auto settingsToUse = !iAltMode ? this->settings : this->settingsAlt;
 

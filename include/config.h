@@ -16,10 +16,10 @@
 #define I2S_BCLK        27
 #define I2S_LRC         14
 
-#define FRONT_STRIP_PIN     LED_D2
-#define BACK_STRIP_PIN      LED_D3
-#define RACETRACK_STRIP_PIN LED_D4
-#define FRONT_TEXT_PIN      LED_D1 
+#define FRONT_STRIP_PIN     LED_D3
+#define BACK_STRIP_PIN      LED_D4
+#define RACETRACK_STRIP_PIN LED_D1
+#define FRONT_TEXT_PIN      LED_D2 
 
 // the advertised service, allowing clients to find us
 #define MW4_BLE_COSTUME_CONTROL_SERVICE_UUID                      "47191881-ebb3-4a9f-9645-3a5c6dae4900"
