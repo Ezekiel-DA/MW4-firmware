@@ -36,11 +36,18 @@ public:
   TextDisplayServiceSettings settings;
   TextDisplayServiceSettings settingsAlt;
 
+  template<uint8_t DATA_PIN> friend void addLEDsToTextDisplayService(TextDisplayService* iTextDisplayService);
+
 private:
   CRGB leds[STRIPLED_W * STRIPLED_H];
   StripDisplay* strip;
+  CLEDController* controller = nullptr;
 
   void createBLECharacteristics(TextDisplayServiceSettings& settings, bool iAltMode=false);
 
   BLECharacteristic* createCharacteristic(const char** uuids, const char* iDisplayName, bool iAltMode=false);
+};
+
+template<uint8_t DATA_PIN> void addLEDsToTextDisplayService(TextDisplayService* iTextDisplayService) {
+  iTextDisplayService->controller = &FastLED.addLeds<WS2812B, DATA_PIN, GRB>(iTextDisplayService->leds, STRIPLED_W * STRIPLED_H);
 };

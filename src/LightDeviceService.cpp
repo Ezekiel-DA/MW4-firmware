@@ -12,6 +12,9 @@
 
 static uint8_t _autoId = 1;
 
+static uint8_t pulseVal;
+static uint8_t colorCycle;
+
 LightDeviceService::LightDeviceService(BLEServer* iServer, const size_t& len, const std::string& iName, uint8_t iId) : numLEDs(len) {
   this->service = iServer->createService(MW4_BLE_LIGHT_DEVICE_SERVICE_UUID);
 
@@ -47,6 +50,8 @@ LightDeviceService::LightDeviceService(BLEServer* iServer, const size_t& len, co
   valueCharacteristic->setCallbacks(this);
   valueCharacteristic->setValue(&(this->value), 1);
   attachUserDescriptionToCharacteristic(valueCharacteristic, "Value");
+
+  prevUpdate = millis();
 }
 
 void LightDeviceService::onWrite(BLECharacteristic* characteristic) {
@@ -63,34 +68,69 @@ void LightDeviceService::onWrite(BLECharacteristic* characteristic) {
       this->value = *data;
     } else if (id.equals(std::string(MW4_BLE_STATE_CHARACTERISTIC_UUID))) {
       this->state = (*data) != 0;
+
     } else if (id.equals(std::string(MW4_BLE_MODE_CHARACTERISTIC_UUID))) {
       this->mode = *data;
     }
 }
 
+void LightDeviceService::globalAnimationUpdate() {
+  auto now = millis();
+
+  static auto lastPulseUpdate = millis();
+  static auto lastRainbowUpdate = millis();
+
+  if (now - lastPulseUpdate > 40) {
+    ++pulseVal;
+    lastPulseUpdate = now;
+  }
+
+  if (now - lastRainbowUpdate > 100) {
+    ++colorCycle;
+    lastRainbowUpdate = now;
+  }
+}
+
 void LightDeviceService::update(bool iAltMode) {
-  static uint16_t prev = millis();
+  auto now = millis();
+  
+  // local update for the current light strip only
+  auto elapsed = now - prevUpdate;
 
-  uint16_t now = millis();
-  if ((uint16_t)(now - prev) >= 50) { // TODO: move hardcoded ~30FPS elsewhere
-    if (this->state == false) {
-      setAllLEDs(CRGB::Black, this->leds, this->numLEDs);
-      return;
-    }
+  if (elapsed < 16) {
+    return;
+  }
 
+  if ((this->state == false || this->mode == 0) && elapsed < 300) { // no need to update fast if we're not animating anything
+    return;
+  }
+  
+  // ready for a frame of display
+  prevUpdate = now;
+
+  if (this->state == false) {
+    setAllLEDs(CRGB::Black, this->leds, this->numLEDs);
+  } else {
     switch (this->mode) {
       case 0: // steady
         setAllLEDs(CHSV(this->hue, this->saturation, this->value), this->leds, this->numLEDs);
         break;
       case 1: // pulse
       {
-        static uint8_t pulseVal = 0;
-        setAllLEDs(CHSV(this->hue, this->saturation, quadwave8(pulseVal++)), this->leds, this->numLEDs);
+        // pulse logic:
+        // cycle through FastLED's quadwave8, a slightly squashed sinusoid
+        // scale8 by this->value, usually our "brightness" setting, but here our "max brightness" instead
+        // saturating add a little bit of brightness to get the bottom of the curve up and away from "lights off", which looks ugly (and flickers)
+        auto val = scale8(quadwave8(pulseVal), this->value);
+        val = qadd8(val, 20);
+        setAllLEDs(CHSV(this->hue, this->saturation, val), this->leds, this->numLEDs);
         break;
       }
       case 2: // rainbow
-        Serial.println("!! INVALID MODE RECEIVED !!");
+        setAllLEDs(CHSV(colorCycle, 255, this->value), this->leds, this->numLEDs);
         break;
     }
-  }  
+  }
+
+  controller->showLeds();
 }

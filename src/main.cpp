@@ -12,83 +12,60 @@ using namespace ace_button;
 #include "LightDeviceService.h"
 #include "MusicService.h"
 #include "SD_FS.h"
-
-#include <Wire.h> // for SX1509 I2C
-#include <SparkFunSX1509.h>
-
-// SX1509 I2C address (set by ADDR1 and ADDR0 (00 by default):
-const byte SX1509_ADDRESS = 0x3E; // SX1509 I2C address
-SX1509 io;                        // Create an SX1509 object to be used throughout
-
-// SX1509 Pin definition:
-const byte SX1509_LED_PIN = 15; // LED to SX1509's pin 15
-
+#include "SX1509.h"
 
 #define FW_VERSION 1
 
 CostumeControlService* costumeController = nullptr;
 TextDisplayService* frontText = nullptr;
-LightDeviceService* frontStrip = nullptr;
-LightDeviceService* backStrip = nullptr;
+
 LightDeviceService* racetrackStrip = nullptr;
+LightDeviceService* bottomVStrip = nullptr;
+LightDeviceService* frontUStrip = nullptr;
+LightDeviceService* backUStrip = nullptr;
+LightDeviceService* backScreenStrip = nullptr;
+LightDeviceService* pedestalStrip = nullptr;
+
+extern SX1509 io;
 
 void setup()
 {
   Serial.begin(115200);
 
-  // TODO: move this: SX1509 LED output setup
-  Wire.begin();
-
-  if (io.begin(SX1509_ADDRESS) == false)
-  {
-    Serial.println("Failed to communicate. Check wiring and address of SX1509.");
-    while (1)
-      ; // If we fail to communicate, loop forever.
-  }
-
-  // Use the internal 2MHz oscillator.
-  // Set LED clock to 500kHz (2MHz / (2^(3-1)):
-  //io.clock(INTERNAL_CLOCK_2MHZ, 3);
-
-  // To breathe an LED, make sure you set it as an
-  // ANALOG_OUTPUT, so we can PWM the pin:
-  //io.pinMode(SX1509_LED_PIN, ANALOG_OUTPUT);
-  io.pinMode(SX1509_LED_PIN, OUTPUT);
-
-  // Breathe an LED: 1000ms LOW, 500ms HIGH,
-  // 500ms to rise from low to high
-  // 250ms to fall from high to low
-  //io.breathe(SX1509_LED_PIN, 10, 10000, 1, 1);
-  //io.blink(SX1509_LED_PIN, 5, 10);
-  io.digitalWrite(SX1509_LED_PIN, HIGH);
-
-  // TODO move the above (SWX1509 led setup)
-
-
-  pinMode(STATUS_LED_PIN, OUTPUT);
-  digitalWrite(STATUS_LED_PIN, LOW);
-
   setupButtons();
-  setupSD();
-
-  audioInit();
+  
+  // setup optional modules
+  //setupSX1509();
+  //setupSD();
+  //audioInit();
 
   auto bleServer = setupBLE();
-
   costumeController = new CostumeControlService(bleServer, FW_VERSION);
+
+  // LED strips
   frontText = new TextDisplayService(bleServer, "I WANT YOU");
-  frontStrip = new LightDeviceService(bleServer, 200, "Front strip");
-  addLEDsToLightDeviceService<FRONT_STRIP_PIN>(frontStrip);
-  backStrip = new LightDeviceService(bleServer, 400, "Back strip");
-  addLEDsToLightDeviceService<BACK_STRIP_PIN>(backStrip);
+  addLEDsToTextDisplayService<FRONT_TEXT_PIN>(frontText);
   racetrackStrip = new LightDeviceService(bleServer, 300, "Racetrack");
   addLEDsToLightDeviceService<RACETRACK_STRIP_PIN>(racetrackStrip);
+  bottomVStrip = new LightDeviceService(bleServer, 5, "Bottom V");
+  addLEDsToLightDeviceService<BOTTOM_V_PIN>(bottomVStrip);
+  frontUStrip = new LightDeviceService(bleServer, 120, "Front U");
+  addLEDsToLightDeviceService<FRONT_U_PIN>(frontUStrip);
+  backUStrip = new LightDeviceService(bleServer, 120, "Back U");
+  addLEDsToLightDeviceService<BACK_U_PIN>(backUStrip);
+  backScreenStrip = new LightDeviceService(bleServer, 200, "Back screen");
+  addLEDsToLightDeviceService<BACK_SCREEN_PIN>(backScreenStrip);
+  pedestalStrip = new LightDeviceService(bleServer, 300, "Pedestal");
+  addLEDsToLightDeviceService<PEDESTAL_PIN>(pedestalStrip);
 
   costumeController->service->start();
   frontText->service->start();
-  frontStrip->service->start();
-  backStrip->service->start();
   racetrackStrip->service->start();
+  bottomVStrip->service->start();
+  frontUStrip->service->start();
+  backUStrip->service->start();
+  backScreenStrip->service->start();
+  pedestalStrip->service->start();
 
   BLEDevice::startAdvertising();
 
@@ -100,15 +77,14 @@ std::string artist;
 
 void loop()
 {
-  checkButtons();
+  //checkButtons();
 
-  if (altMode) {
-    digitalWrite(STATUS_LED_PIN, HIGH);
-    frontText->settingsAlt.text = artist + " - " + title;
-    io.breathe(SX1509_LED_PIN, 10000, 10, 1, 1);
-  } else {
-    digitalWrite(STATUS_LED_PIN, LOW);
-  }
+  // if (altMode) {
+  //   io.digitalWrite(SX1509_STATUS_LED_PIN, HIGH);
+  //   frontText->settingsAlt.text = artist + " - " + title;
+  // } else {
+  //   io.digitalWrite(SX1509_STATUS_LED_PIN, LOW);
+  // }
 
   if (!deviceConnected && oldDeviceConnected) {
     delay(100);
@@ -121,12 +97,17 @@ void loop()
     oldDeviceConnected = deviceConnected;
   }
 
+  LightDeviceService::globalAnimationUpdate();
+  
+  // WARNING: DO NOT DISABLE ANY OF THESE! These end up calling each FastLED controller separately (so we can update at different speeds to deal with our sheer amount of pixels).
+  // I'm not sure why but it looks like failing to update all controllers at least occasionally causes FastLED to hang?
   frontText->update(altMode);
-  frontStrip->update();
-  backStrip->update();
   racetrackStrip->update();
-
-  FastLED.show();
+  bottomVStrip->update();
+  frontUStrip->update();
+  backUStrip->update();
+  backScreenStrip->update();
+  pedestalStrip->update();
 }
 
 void audio_id3data(const char *info){  //id3 metadata

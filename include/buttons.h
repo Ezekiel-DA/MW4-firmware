@@ -3,6 +3,7 @@
 #include <AceButton.h>
 using namespace ace_button;
 
+#include "config.h"
 #include "MusicService.h"
 
 ButtonConfig mainButtonConfig;
@@ -33,7 +34,7 @@ void mainButtonEventHandler(AceButton* button, uint8_t eventType, uint8_t button
 
 void setupButtons()
 {
-  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  pinMode(SX1509_BUTTON_PIN, INPUT_PULLUP);
   mainButton.init((uint8_t)0);
   mainButtonConfig.setEventHandler(mainButtonEventHandler);
 }

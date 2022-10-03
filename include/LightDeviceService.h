@@ -17,8 +17,6 @@ public:
 
   size_t numLEDs;
 
-  uint8_t brightness = 10;
-
   uint8_t mode = 1; // steady, pulse, rainbow? (which would override hue, obviously)
   bool state = true; // on / off
   uint8_t hue = 255;
@@ -27,11 +25,17 @@ public:
 
   template<uint8_t DATA_PIN> friend void addLEDsToLightDeviceService(LightDeviceService* iLightDevice);
 
+  static void globalAnimationUpdate();
+
   private:
     CRGB* leds;
+    CLEDController* controller;
+
+    uint32_t prevUpdate;
 };
 
 template<uint8_t DATA_PIN> void addLEDsToLightDeviceService(LightDeviceService* iLightDevice) {
   iLightDevice->leds = (CRGB*) malloc(sizeof(CRGB) * iLightDevice->numLEDs);
-  FastLED.addLeds<WS2812B, DATA_PIN, GRB>(iLightDevice->leds, iLightDevice->numLEDs);
+  iLightDevice->controller = &FastLED.addLeds<WS2812B, DATA_PIN, GRB>(iLightDevice->leds, iLightDevice->numLEDs);
+  iLightDevice->controller->setDither(0);
 };
