@@ -44,7 +44,7 @@ void setup()
   addLEDsToLightDeviceService<RACETRACK_STRIP_PIN>(racetrackStrip);
   bottomVStrip = new LightDeviceService(bleServer, 3, "Bottom V");
   addLEDsToLightDeviceService<BOTTOM_V_PIN>(bottomVStrip);
-  frontUStrip = new LightDeviceService(bleServer, 120, "Front U");
+  frontUStrip = new LightDeviceService(bleServer, 155, "Front U");
   addLEDsToLightDeviceService<FRONT_U_PIN>(frontUStrip);
   backUStrip = new LightDeviceService(bleServer, 120, "Back U");
   addLEDsToLightDeviceService<BACK_U_PIN>(backUStrip);
