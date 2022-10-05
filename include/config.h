@@ -1,8 +1,7 @@
 #pragma once
 
-// TODO update these
-#define SX1509_STATUS_LED_PIN  15
-#define SX1509_BUTTON_PIN      0
+//#define BUTTON_PIN      21
+#define BUTTON_PIN 0 // for testing; use 21 above for the costume
 
 #define LED_D1          13
 #define LED_D2          12

@@ -1,6 +1,28 @@
-#include "Audio.h"
+#include "MusicService.h"
 
+#include <Arduino.h>
+#include <NimBLEDevice.h>
+
+#include <Audio.h>
+#include <string>
+
+#include "BLE.h"
 #include "config.h"
+
+char* trackMapping[] = {
+  "/billy_joel_piano_man.mp3", // 0
+  "/blues_traveler_hook.mp3",
+  "/blues_traveler_run_around.mp3",
+  "/bobby_boris_picket_monster_mash.mp3",
+  "/encanto_surface_pressure.mp3",
+  "/israel_kamakawiwo_ole_somewhere_over_the_rainbow.mp3",
+  "/journey_dont_stop_believing.mp3",
+  "/raffi_lets_play.mp3",
+  "/sia_riding_on_my_bike.mp3",
+  "/taylor_swift_shake_it_off.mp3",
+  "/taylor_swift_the_best_day.mp3",
+  "/the_impressions_its_all_right.mp3", // 11
+};
 
 struct audioMessage{
     uint8_t     cmd;
@@ -32,7 +54,6 @@ void audioTask(void *parameter) {
     struct audioMessage audioTxTaskMessage;
 
     audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
-    audio.setVolume(21); // 0...21
 
     while(true){
         if(xQueueReceive(audioSetQueue, &audioRxTaskMessage, 1) == pdPASS) {
@@ -99,4 +120,47 @@ bool audioConnecttoSD(const char* filename){
     audioTxMessage.txt = filename;
     audioMessage RX = transmitReceive(audioTxMessage);
     return RX.ret;
+}
+
+MusicService::MusicService(BLEServer* iServer) {
+  audioInit();
+
+  audioSetVolume(this->volume);
+
+  this->service = iServer->createService(MW4_BLE_MUSIC_CONTROL_SERVICE_UUID);
+
+  auto stateCharacteristic = service->createCharacteristic(MW4_BLE_MUSIC_CONTROL_STATE_CHARACTERISTIC, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE |NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::INDICATE);
+  stateCharacteristic->setCallbacks(this);
+  stateCharacteristic->setValue((uint8_t*) &(this->state), 1);
+  attachUserDescriptionToCharacteristic(stateCharacteristic, "State");
+
+  auto volumeCharacteristic = service->createCharacteristic(MW4_BLE_MUSIC_CONTROL_VOLUME_CHARACTERISTIC, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE |NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::INDICATE);
+  volumeCharacteristic->setCallbacks(this);
+  volumeCharacteristic->setValue(&(this->volume), 1);
+  attachUserDescriptionToCharacteristic(volumeCharacteristic, "Volume");
+
+  auto trackCharacteristic = service->createCharacteristic(MW4_BLE_MUSIC_CONTROL_TRACK_CHARACTERISTIC, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE |NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::INDICATE);
+  trackCharacteristic->setCallbacks(this);
+  trackCharacteristic->setValue(&(this->track), 1);
+  attachUserDescriptionToCharacteristic(trackCharacteristic, "Track");
+}
+
+void MusicService::onWrite(BLECharacteristic* characteristic) {
+    BLEUUID id = characteristic->getUUID();
+
+    std::string safeData = characteristic->getValue();
+    uint8_t* data = (uint8_t*)safeData.data();
+
+    if (id.equals(std::string(MW4_BLE_MUSIC_CONTROL_TRACK_CHARACTERISTIC))) {
+      this->track = *data;
+    } else if (id.equals(std::string(MW4_BLE_MUSIC_CONTROL_VOLUME_CHARACTERISTIC))) {
+      this->volume = *data;
+      audioSetVolume(this->volume);
+    } else if (id.equals(std::string(MW4_BLE_STATE_CHARACTERISTIC_UUID))) {
+      this->state = (*data) != 0;
+    }
+}
+
+void MusicService::play() {
+  audioConnecttoSD(trackMapping[this->track]);
 }

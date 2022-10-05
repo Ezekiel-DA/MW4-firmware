@@ -12,7 +12,6 @@ using namespace ace_button;
 #include "LightDeviceService.h"
 #include "MusicService.h"
 #include "SD_FS.h"
-#include "SX1509.h"
 
 #define FW_VERSION 1
 
@@ -26,18 +25,14 @@ LightDeviceService* backUStrip = nullptr;
 LightDeviceService* backScreenStrip = nullptr;
 LightDeviceService* pedestalStrip = nullptr;
 
-extern SX1509 io;
+MusicService* musicService = nullptr;
 
 void setup()
 {
   Serial.begin(115200);
 
-  setupButtons();
-  
-  // setup optional modules
-  //setupSX1509();
-  //setupSD();
-  //audioInit();
+  setupButtons(&musicService);
+  setupSD();
 
   auto bleServer = setupBLE();
   costumeController = new CostumeControlService(bleServer, FW_VERSION);
@@ -47,7 +42,7 @@ void setup()
   addLEDsToTextDisplayService<FRONT_TEXT_PIN>(frontText);
   racetrackStrip = new LightDeviceService(bleServer, 300, "Racetrack");
   addLEDsToLightDeviceService<RACETRACK_STRIP_PIN>(racetrackStrip);
-  bottomVStrip = new LightDeviceService(bleServer, 20, "Bottom V");
+  bottomVStrip = new LightDeviceService(bleServer, 3, "Bottom V");
   addLEDsToLightDeviceService<BOTTOM_V_PIN>(bottomVStrip);
   frontUStrip = new LightDeviceService(bleServer, 120, "Front U");
   addLEDsToLightDeviceService<FRONT_U_PIN>(frontUStrip);
@@ -59,6 +54,8 @@ void setup()
   pedestalStrip = new LightDeviceService(bleServer, 300, "Pedestal");
   addLEDsToLightDeviceService<PEDESTAL_PIN>(pedestalStrip);
 
+  musicService = new MusicService(bleServer);
+
   costumeController->service->start();
   frontText->service->start();
   racetrackStrip->service->start();
@@ -67,6 +64,7 @@ void setup()
   backUStrip->service->start();
   backScreenStrip->service->start();
   pedestalStrip->service->start();
+  musicService->service->start();
 
   BLEDevice::startAdvertising();
 
@@ -78,7 +76,7 @@ std::string artist;
 
 void loop()
 {
-  //checkButtons();
+  checkButtons();
 
   // if (altMode) {
   //   io.digitalWrite(SX1509_STATUS_LED_PIN, HIGH);
