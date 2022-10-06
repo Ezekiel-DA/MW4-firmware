@@ -38,20 +38,20 @@ void setup()
   costumeController = new CostumeControlService(bleServer, FW_VERSION);
 
   // LED strips
-  frontText = new TextDisplayService(bleServer, "I WANT YOU");
+  frontText = new TextDisplayService(bleServer, "TEAM SAVANNAH", "I WANT YOU");
   addLEDsToTextDisplayService<FRONT_TEXT_PIN>(frontText);
-  racetrackStrip = new LightDeviceService(bleServer, 300, "Racetrack");
+  racetrackStrip = new LightDeviceService(bleServer, RACETRACK_NUM_LEDS, "Racetrack");
   addLEDsToLightDeviceService<RACETRACK_STRIP_PIN>(racetrackStrip);
-  bottomVStrip = new LightDeviceService(bleServer, 70, "Bottom V");
+  bottomVStrip = new LightDeviceService(bleServer, BOTTOM_V_NUM_LEDS, "Bottom V");
   addLEDsToLightDeviceService<BOTTOM_V_PIN>(bottomVStrip);
-  frontUStrip = new LightDeviceService(bleServer, 155, "Front U");
+  frontUStrip = new LightDeviceService(bleServer, FRONT_U_NUM_LEDS, "Front U");
   addLEDsToLightDeviceService<FRONT_U_PIN>(frontUStrip);
-  backUStrip = new LightDeviceService(bleServer, 120, "Back U");
+  backUStrip = new LightDeviceService(bleServer, BACK_U_NUM_LEDS, "Back U");
   addLEDsToLightDeviceService<BACK_U_PIN>(backUStrip);
-  backScreenStrip = new LightDeviceService(bleServer, 200, "Back screen");
-  backScreenStrip->mode = 0; // steady
+  backScreenStrip = new LightDeviceService(bleServer, BACK_SCREEN_NUM_LEDS, "Back screen");
+  backScreenStrip->_backScreenHack = true;
   addLEDsToLightDeviceService<BACK_SCREEN_PIN>(backScreenStrip);
-  pedestalStrip = new LightDeviceService(bleServer, 300, "Pedestal");
+  pedestalStrip = new LightDeviceService(bleServer, PEDESTAL_NUM_LEDS, "Pedestal");
   addLEDsToLightDeviceService<PEDESTAL_PIN>(pedestalStrip);
 
   musicService = new MusicService(bleServer);
@@ -70,18 +70,18 @@ void setup()
   BLEDevice::startAdvertising();
 
   Serial.print("MW4 init complete - running version: "); Serial.println(FW_VERSION);
+
+  //xTaskCreate(ledUpdateTask, "main loop", 20000, nullptr, 3, nullptr);
 }
 
 std::string title;
 std::string artist;
 
-uint16_t loopNum = 0;
-
-
-
 void loop()
 {
   checkButtons();
+
+  bool altMode = getAltMode();
 
   // if (altMode) {
   //   io.digitalWrite(SX1509_STATUS_LED_PIN, HIGH);
@@ -106,18 +106,16 @@ void loop()
   }
 
   LightDeviceService::globalAnimationUpdate();
-  
+
   frontText->update(altMode);
-  racetrackStrip->update();
-  bottomVStrip->update();
-  frontUStrip->update();
-  backUStrip->update();
-  backScreenStrip->update();
-  pedestalStrip->update();
+  racetrackStrip->update(altMode);
+  bottomVStrip->update(altMode);
+  frontUStrip->update(altMode);
+  backUStrip->update(altMode);
+  backScreenStrip->update(altMode);
+  pedestalStrip->update(altMode);
 
   FastLED.show();
-
-  //Serial.print("loop: "); Serial.println(loopNum++);
 }
 
 void audio_id3data(const char *info){  //id3 metadata
@@ -127,4 +125,8 @@ void audio_id3data(const char *info){  //id3 metadata
   } else if (id3info.find("Artist:") != std::string::npos) {
     artist = id3info.substr(7);
   }
+}
+
+void audio_eof_mp3(const char *info) {
+  esp_restart();
 }

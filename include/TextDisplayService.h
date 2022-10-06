@@ -25,7 +25,7 @@ struct TextDisplayServiceSettings {
 class TextDisplayService : public BLECharacteristicCallbacks {
 
 public:
-  TextDisplayService(BLEServer* iServer, const std::string& iDefaultText);
+  TextDisplayService(BLEServer* iServer, const std::string& iDefaultText, const std::string& iDefaultAltText);
 
   void update(bool iAltMode);
   

@@ -11,11 +11,14 @@ AceButton mainButton(&mainButtonConfig);
 
 static MusicService** musicService = nullptr;
 
+bool altMode = false;
+
 void timerCB(TimerHandle_t xTimer) {
   altMode = false;
+  Serial.println("alt mode off");
 }
 
-TimerHandle_t altModeResetTimerHandle = xTimerCreate("altModeResetTimer", pdMS_TO_TICKS(5000), /*make it one shot*/pdFALSE, 0, timerCB);
+TimerHandle_t altModeResetTimerHandle = xTimerCreate("altModeResetTimer", pdMS_TO_TICKS(ALT_MODE_MS), /*make it one shot*/pdFALSE, 0, timerCB);
 
 void mainButtonEventHandler(AceButton* button, uint8_t eventType, uint8_t buttonState)
 {
@@ -27,6 +30,7 @@ void mainButtonEventHandler(AceButton* button, uint8_t eventType, uint8_t button
       break;
     case AceButton::kEventReleased:
       altMode = true;
+      Serial.println("alt mode on");
       xTimerStart(altModeResetTimerHandle, 0); // this will conveniently reset the timer if it was running
       break;
   }
@@ -50,4 +54,8 @@ void checkButtons()
     mainButton.check();
     prev = now;
   }
+}
+
+bool getAltMode() {
+    return altMode;
 }

@@ -87,7 +87,7 @@ void audioInit() {
         "audioplay",           /* Name of the task */
         5000,                  /* Stack size in words */
         NULL,                  /* Task input parameter */
-        2 | portPRIVILEGE_BIT, /* Priority of the task */
+        5 | portPRIVILEGE_BIT, /* Priority of the task */
         NULL,                  /* Task handle. */
         1                      /* Core where the task should run */
     );

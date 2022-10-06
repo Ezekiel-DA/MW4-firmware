@@ -45,9 +45,11 @@ void TextDisplayService::createBLECharacteristics(TextDisplayServiceSettings& iS
   bgColor->setValue(iSettings.bgColor, 3);
 }
 
-TextDisplayService::TextDisplayService(BLEServer* iServer, const std::string& iDefaultText) {
+TextDisplayService::TextDisplayService(BLEServer* iServer, const std::string& iDefaultText, const std::string& iDefaultAltText) {
   this->settings.text = iDefaultText;
-  this->settingsAlt.text = "ALT MODE";
+  this->settings.scrolling = true;
+  this->settingsAlt.text = iDefaultAltText;
+  this->settingsAlt.scrolling = false;
   this->strip = new StripDisplay(FRONT_TEXT_PIN, STRIPLED_W, STRIPLED_H, WRAP_COLUMNS, ORIGIN_TOP_LEFT, this->leds);  
   this->strip->setup(&fixedMedium_6x8);
 
@@ -113,6 +115,7 @@ void TextDisplayService::update(bool iAltMode) {
     auto now = millis();
     if ((uint16_t)(now - prev) >= settingsToUse.scrollSpeed) {
         auto text = settingsToUse.text;
+        //Serial.print("Text output: alt mode is "); Serial.print(iAltMode); Serial.print("; text to show: "); Serial.println(text.c_str());
         auto customOffset = settingsToUse.offset;
         auto isCustomOffsetOn = !settingsToUse.scrolling;
         int16_t centerPoint = (text.size() * 6) / 2;

@@ -5,6 +5,14 @@
 
 class BLEService;
 
+struct LightDeviceServiceSettings {
+  uint8_t mode = 0; // steady, pulse,  rainbow pulse, rainbow wave
+  bool state = true; // on / off
+  uint8_t hue = 255;
+  uint8_t saturation = 255;
+  uint8_t value = 255;
+};
+
 class LightDeviceService : public BLECharacteristicCallbacks {
 
 public:
@@ -17,11 +25,11 @@ public:
 
   size_t numLEDs;
 
-  uint8_t mode = 1; // steady, pulse,  rainbow pulse, rainbow wave
-  bool state = true; // on / off
-  uint8_t hue = 255;
-  uint8_t saturation = 0;
-  uint8_t value = 255;
+  LightDeviceServiceSettings settings;
+  LightDeviceServiceSettings settingsAlt;
+
+  // HACK avert your eyes
+  bool _backScreenHack = false;
 
   template<uint8_t DATA_PIN> friend void addLEDsToLightDeviceService(LightDeviceService* iLightDevice);
 

@@ -15,6 +15,18 @@ static uint8_t _autoId = 1;
 static uint8_t colorCycle;
 
 LightDeviceService::LightDeviceService(BLEServer* iServer, const size_t& len, const std::string& iName, uint8_t iId) : numLEDs(len) {
+  // default settings; TODO: move these
+  settings.mode = 1;
+  settings.saturation = 255;
+  settings.hue = 255;
+  settings.value = 255;
+
+  settingsAlt.mode = 0;
+  settingsAlt.saturation = 0;
+  settingsAlt.hue = 255;
+  settingsAlt.value = 255;
+
+
   this->service = iServer->createService(MW4_BLE_LIGHT_DEVICE_SERVICE_UUID);
 
   auto objectName = service->createCharacteristic((uint16_t)0x2ABE, NIMBLE_PROPERTY::READ);
@@ -27,27 +39,27 @@ LightDeviceService::LightDeviceService(BLEServer* iServer, const size_t& len, co
 
   auto stateCharacteristic = service->createCharacteristic(MW4_BLE_STATE_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE |NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::INDICATE);
   stateCharacteristic->setCallbacks(this);
-  stateCharacteristic->setValue((uint8_t*) &(this->state), 1);
+  stateCharacteristic->setValue((uint8_t*) &(this->settings.state), 1);
   attachUserDescriptionToCharacteristic(stateCharacteristic, "State");
 
   auto modeCharacteristic = service->createCharacteristic(MW4_BLE_MODE_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE |NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::INDICATE);
   modeCharacteristic->setCallbacks(this);
-  modeCharacteristic->setValue(&(this->mode), 1);
+  modeCharacteristic->setValue(&(this->settings.mode), 1);
   attachUserDescriptionToCharacteristic(modeCharacteristic, "Mode");
 
   auto hueCharacteristic = service->createCharacteristic(MW4_BLE_HUE_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE |NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::INDICATE);
   hueCharacteristic->setCallbacks(this);
-  hueCharacteristic->setValue(&(this->hue), 1);
+  hueCharacteristic->setValue(&(this->settings.hue), 1);
   attachUserDescriptionToCharacteristic(hueCharacteristic, "Hue");
 
   auto saturationCharacteristic = service->createCharacteristic(MW4_BLE_SATURATION_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE |NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::INDICATE);
   saturationCharacteristic->setCallbacks(this);
-  saturationCharacteristic->setValue(&(this->saturation), 1);
+  saturationCharacteristic->setValue(&(this->settings.saturation), 1);
   attachUserDescriptionToCharacteristic(saturationCharacteristic, "Saturation");
 
   auto valueCharacteristic = service->createCharacteristic(MW4_BLE_VALUE_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE |NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::INDICATE);
   valueCharacteristic->setCallbacks(this);
-  valueCharacteristic->setValue(&(this->value), 1);
+  valueCharacteristic->setValue(&(this->settings.value), 1);
   attachUserDescriptionToCharacteristic(valueCharacteristic, "Value");
 
   prevUpdate = millis();
@@ -60,16 +72,16 @@ void LightDeviceService::onWrite(BLECharacteristic* characteristic) {
     uint8_t* data = (uint8_t*)safeData.data();
 
     if (id.equals(std::string(MW4_BLE_HUE_CHARACTERISTIC_UUID))) {
-      this->hue = *data;
+      this->settings.hue = *data;
     } else if (id.equals(std::string(MW4_BLE_SATURATION_CHARACTERISTIC_UUID))) {
-      this->saturation = *data;
+      this->settings.saturation = *data;
     } else if (id.equals(std::string(MW4_BLE_VALUE_CHARACTERISTIC_UUID))) {
-      this->value = *data;
+      this->settings.value = *data;
     } else if (id.equals(std::string(MW4_BLE_STATE_CHARACTERISTIC_UUID))) {
-      this->state = (*data) != 0;
+      this->settings.state = (*data) != 0;
 
     } else if (id.equals(std::string(MW4_BLE_MODE_CHARACTERISTIC_UUID))) {
-      this->mode = *data;
+      this->settings.mode = *data;
     }
 }
 
@@ -86,6 +98,8 @@ void LightDeviceService::globalAnimationUpdate() {
 
 void LightDeviceService::update(bool iAltMode) {
   auto now = millis();
+
+  auto settingsToUse = !iAltMode ? this->settings : this->settingsAlt;
   
   // local update for the current light strip only
   auto elapsed = now - prevUpdate;
@@ -94,30 +108,50 @@ void LightDeviceService::update(bool iAltMode) {
     return;
   }
 
-  if ((this->state == false || this->mode == 0) && elapsed < 300) { // no need to update fast if we're not animating anything
+  if ((settingsToUse.state == false || settingsToUse.mode == 0) && elapsed < 300) { // no need to update fast if we're not animating anything
     return;
   }
   
   // ready for a frame of display
   prevUpdate = now;
 
-  if (this->state == false) {
+  if (settingsToUse.state == false) {
     fill_solid(this->leds, this->numLEDs, CRGB::Black);
   } else {
-    switch (this->mode) {
+    switch (settingsToUse.mode) {
       case 0: // steady
-        fill_solid(this->leds, this->numLEDs, CHSV(this->hue, this->saturation, this->value));
+        if (this->_backScreenHack) {
+          fill_solid(this->leds, BACK_SCREEN_NUM_BACKLIGHT_LEDS, CRGB::White);
+          fill_solid(&(this->leds[BACK_SCREEN_NUM_BACKLIGHT_LEDS]), this->numLEDs - BACK_SCREEN_NUM_BACKLIGHT_LEDS, CHSV(settingsToUse.hue, settingsToUse.saturation, settingsToUse.saturation == 255 ? BRIGHTNESS_LIMIT_AT_WHITE : settingsToUse.value));
+        } else {
+          fill_solid(this->leds, this->numLEDs, CHSV(settingsToUse.hue, settingsToUse.saturation, settingsToUse.saturation == 255 ? BRIGHTNESS_LIMIT_AT_WHITE : settingsToUse.value));
+        }
         break;
       case 1: // pulse
       {
-        fill_solid(this->leds, this->numLEDs, CHSV(this->hue, this->saturation, beatsin8(20, 20, this->value)));
+        if (this->_backScreenHack) {
+          fill_solid(this->leds, BACK_SCREEN_NUM_BACKLIGHT_LEDS, CRGB::White);
+          fill_solid(&(this->leds[BACK_SCREEN_NUM_BACKLIGHT_LEDS]), this->numLEDs - BACK_SCREEN_NUM_BACKLIGHT_LEDS, CHSV(settingsToUse.hue, settingsToUse.saturation, beatsin8(PULSE_BPM, 20, settingsToUse.value)));
+        } else {
+          fill_solid(this->leds, this->numLEDs, CHSV(settingsToUse.hue, settingsToUse.saturation, beatsin8(PULSE_BPM, 20, settingsToUse.saturation == 255 ? BRIGHTNESS_LIMIT_AT_WHITE : settingsToUse.value)));
+        }
         break;
       }
       case 2: // rainbow fill
-        fill_solid(this->leds, this->numLEDs, CHSV(colorCycle, 255, this->value));
+        if (this->_backScreenHack) {
+          fill_solid(this->leds, BACK_SCREEN_NUM_BACKLIGHT_LEDS, CRGB::White);
+          fill_solid(&(this->leds[BACK_SCREEN_NUM_BACKLIGHT_LEDS]), this->numLEDs - BACK_SCREEN_NUM_BACKLIGHT_LEDS, CHSV(colorCycle, 255, settingsToUse.value));
+        } else {
+          fill_solid(this->leds, this->numLEDs, CHSV(colorCycle, 255, settingsToUse.value));
+        }
         break;
       case 3: // rainbow wave
-        fill_rainbow(this->leds, this->numLEDs, beat8(5), 5);
+        if (this->_backScreenHack) {
+          fill_solid(this->leds, BACK_SCREEN_NUM_BACKLIGHT_LEDS, CRGB::White);
+          fill_rainbow(&(this->leds[BACK_SCREEN_NUM_BACKLIGHT_LEDS]), this->numLEDs - BACK_SCREEN_NUM_BACKLIGHT_LEDS, beat8(5), 5);
+        } else {
+          fill_rainbow(this->leds, this->numLEDs, beat8(5), 5);
+        }
         break;
     }
   }

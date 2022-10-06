@@ -1,7 +1,30 @@
 #pragma once
 
-#define BUTTON_PIN      21
-//#define BUTTON_PIN 0 // for testing; use 21 above for the costume
+// TODO: CHANGE ME! Defaults for dev device vs costume
+#define BUTTON_PIN        21
+//#define BUTTON_PIN          0 // for testing; use 21 above for the costume
+#define DEFAULT_VOLUME      21
+#define DEFAULT_TRACK       0
+
+#define PULSE_BPM 20
+
+#define ALT_MODE_MS 60000
+
+#define BRIGHTNESS_LIMIT_AT_WHITE 200 // 200
+
+// actual costume values in comment; use those, or lower for testing
+#define RACETRACK_NUM_LEDS              300      // 300
+
+#define BOTTOM_V_NUM_LEDS               70      // 70
+
+#define FRONT_U_NUM_LEDS                155     // 155
+
+#define BACK_U_NUM_LEDS                 120     // 120
+
+#define BACK_SCREEN_NUM_LEDS            155      // 155
+#define BACK_SCREEN_NUM_BACKLIGHT_LEDS  83      // 83 // just the backlight bit, which precedes the rest (0-82: backlight; 83-154: perimeter)
+
+#define PEDESTAL_NUM_LEDS               300     // 300
 
 #define LED_D1          13
 #define LED_D2          12
@@ -26,8 +49,6 @@
 // - rail 3: LED3, LED6 (this rail also powers the Amp, mic, SPI Flash and GPIO expander)
 #define FRONT_TEXT_PIN      LED_D3
 #define PEDESTAL_PIN        LED_D6
-
-
 
 // =================================================================
 // Bluetooth Low Energy settings
