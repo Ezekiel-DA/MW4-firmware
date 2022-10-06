@@ -162,5 +162,7 @@ void MusicService::onWrite(BLECharacteristic* characteristic) {
 }
 
 void MusicService::play() {
+  srand(millis());
+  this->track = rand() % 12;
   audioConnecttoSD(trackMapping[this->track]);
 }

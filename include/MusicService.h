@@ -16,6 +16,6 @@ public:
   BLEService* service = nullptr;
 
   bool state = true; // on / off
-  uint8_t volume = 21;
+  uint8_t volume = 5;
   uint8_t track = 0;
 };

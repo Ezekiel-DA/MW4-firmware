@@ -110,7 +110,7 @@ void LightDeviceService::update(bool iAltMode) {
         break;
       case 1: // pulse
       {
-        setAllLEDs(CHSV(this->hue, this->saturation, beatsin8(20, 20, this->value)), this->leds, this->numLEDs);
+        fill_solid(this->leds, this->numLEDs, CHSV(this->hue, this->saturation, beatsin8(20, 20, this->value)));
         break;
       }
       case 2: // rainbow fill
@@ -122,5 +122,5 @@ void LightDeviceService::update(bool iAltMode) {
     }
   }
 
-  controller->showLeds();
+  //controller->showLeds();
 }

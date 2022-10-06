@@ -42,7 +42,7 @@ void setup()
   addLEDsToTextDisplayService<FRONT_TEXT_PIN>(frontText);
   racetrackStrip = new LightDeviceService(bleServer, 300, "Racetrack");
   addLEDsToLightDeviceService<RACETRACK_STRIP_PIN>(racetrackStrip);
-  bottomVStrip = new LightDeviceService(bleServer, 3, "Bottom V");
+  bottomVStrip = new LightDeviceService(bleServer, 70, "Bottom V");
   addLEDsToLightDeviceService<BOTTOM_V_PIN>(bottomVStrip);
   frontUStrip = new LightDeviceService(bleServer, 155, "Front U");
   addLEDsToLightDeviceService<FRONT_U_PIN>(frontUStrip);
@@ -64,6 +64,7 @@ void setup()
   backUStrip->service->start();
   backScreenStrip->service->start();
   pedestalStrip->service->start();
+
   musicService->service->start();
 
   BLEDevice::startAdvertising();
@@ -73,6 +74,10 @@ void setup()
 
 std::string title;
 std::string artist;
+
+uint16_t loopNum = 0;
+
+
 
 void loop()
 {
@@ -102,8 +107,6 @@ void loop()
 
   LightDeviceService::globalAnimationUpdate();
   
-  // WARNING: DO NOT DISABLE ANY OF THESE! These end up calling each FastLED controller separately (so we can update at different speeds to deal with our sheer amount of pixels).
-  // I'm not sure why but it looks like failing to update all controllers at least occasionally causes FastLED to hang?
   frontText->update(altMode);
   racetrackStrip->update();
   bottomVStrip->update();
@@ -111,6 +114,10 @@ void loop()
   backUStrip->update();
   backScreenStrip->update();
   pedestalStrip->update();
+
+  FastLED.show();
+
+  //Serial.print("loop: "); Serial.println(loopNum++);
 }
 
 void audio_id3data(const char *info){  //id3 metadata

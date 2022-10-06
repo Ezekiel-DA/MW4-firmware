@@ -36,7 +36,7 @@ void setupButtons(MusicService** iMusicService)
 {
   musicService = iMusicService;
   pinMode(BUTTON_PIN, INPUT_PULLUP);
-  mainButton.init((uint8_t)0);
+  mainButton.init((uint8_t)BUTTON_PIN);
   mainButtonConfig.setEventHandler(mainButtonEventHandler);
 }
 

@@ -140,7 +140,7 @@ void TextDisplayService::update(bool iAltMode) {
             }
         }
 
-        controller->showLeds(this->settings.brightness);
+        //controller->showLeds(this->settings.brightness);
         prev = now;
     }
 }
