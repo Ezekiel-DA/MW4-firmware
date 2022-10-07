@@ -1,5 +1,7 @@
 #pragma once
 
+#define FW_VERSION 2
+
 // TODO: CHANGE ME! Defaults for dev device vs costume
 #define BUTTON_PIN        21
 //#define BUTTON_PIN          0 // for testing; use 21 above for the costume
@@ -22,7 +24,7 @@
 #define BACK_U_NUM_LEDS                 120     // 120
 
 #define BACK_SCREEN_NUM_LEDS            155      // 155
-#define BACK_SCREEN_NUM_BACKLIGHT_LEDS  83      // 83 // just the backlight bit, which precedes the rest (0-82: backlight; 83-154: perimeter)
+#define BACK_SCREEN_NUM_BACKLIGHT_LEDS  73      // 73 // just the backlight bit, which precedes the rest (0-82: backlight; 83-154: perimeter)
 
 #define PEDESTAL_NUM_LEDS               300     // 300
 

@@ -13,8 +13,6 @@ using namespace ace_button;
 #include "MusicService.h"
 #include "SD_FS.h"
 
-#define FW_VERSION 1
-
 CostumeControlService* costumeController = nullptr;
 TextDisplayService* frontText = nullptr;
 
