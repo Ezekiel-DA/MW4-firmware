@@ -8,7 +8,6 @@
 
 #include "config.h"
 #include "BLE.h"
-#include "utils.h"
 
 static uint8_t _autoId = 1;
 
