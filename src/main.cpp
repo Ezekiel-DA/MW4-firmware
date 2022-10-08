@@ -4,7 +4,6 @@
 using namespace ace_button;
 
 #include "config.h"
-#include "utils.h"
 #include "buttons.h"
 #include "BLE.h"
 #include "CostumeControllerService.h"
