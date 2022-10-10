@@ -1,8 +1,7 @@
 #pragma once
 
-#include "MusicService.h"
-
-void setupButtons(MusicService** iMusicService);
+void setupButtons();
 void checkButtons();
 
 bool getAltMode();
+bool getAndResetPressed();

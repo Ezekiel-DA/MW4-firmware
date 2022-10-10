@@ -4,14 +4,12 @@
 using namespace ace_button;
 
 #include "config.h"
-#include "MusicService.h"
 
 ButtonConfig mainButtonConfig;
 AceButton mainButton(&mainButtonConfig);
 
-static MusicService** musicService = nullptr;
-
 bool altMode = false;
+bool pressed = false;
 
 void timerCB(TimerHandle_t xTimer) {
   altMode = false;
@@ -25,20 +23,17 @@ void mainButtonEventHandler(AceButton* button, uint8_t eventType, uint8_t button
   switch (eventType)
   {
     case AceButton::kEventPressed:
-      Serial.println("pressed");
-      (*musicService)->play();
+      pressed = true;
       break;
     case AceButton::kEventReleased:
       altMode = true;
-      Serial.println("alt mode on");
       xTimerStart(altModeResetTimerHandle, 0); // this will conveniently reset the timer if it was running
       break;
   }
 }
 
-void setupButtons(MusicService** iMusicService)
+void setupButtons()
 {
-  musicService = iMusicService;
   pinMode(BUTTON_PIN, INPUT_PULLUP);
   mainButton.init((uint8_t)BUTTON_PIN);
   mainButtonConfig.setEventHandler(mainButtonEventHandler);
@@ -58,4 +53,10 @@ void checkButtons()
 
 bool getAltMode() {
     return altMode;
+}
+
+bool getAndResetPressed() {
+  auto ret = pressed;
+  pressed = false;
+  return ret;
 }

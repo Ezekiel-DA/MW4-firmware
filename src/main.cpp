@@ -45,7 +45,7 @@ void setup()
 {
   Serial.begin(115200);
 
-  setupButtons(&musicService);
+  setupButtons();
   setupSD();
 
   auto bleServer = setupBLE();
@@ -97,6 +97,11 @@ void loop()
   checkButtons();
 
   bool altMode = getAltMode();
+  bool pressed = getAndResetPressed();
+
+  if (pressed) {
+    musicService->play();
+  }
 
   // if (altMode) {
   //   io.digitalWrite(SX1509_STATUS_LED_PIN, HIGH);
