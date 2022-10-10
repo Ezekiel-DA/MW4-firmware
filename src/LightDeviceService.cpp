@@ -20,7 +20,7 @@ LightDeviceService::LightDeviceService(BLEServer* iServer, const size_t& len, co
   settings.hue = 255;
   settings.value = 255;
 
-  settingsAlt.mode = 0;
+  settingsAlt.mode = 1;
   settingsAlt.saturation = 0;
   settingsAlt.hue = 255;
   settingsAlt.value = 255;

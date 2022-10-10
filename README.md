@@ -118,3 +118,11 @@ NB: don't forget to set metadata on objects in the metadata to give them `Cache-
 Migrating away from Bluedroid seems to improve stability and lower flash memory usage (at the cost of a negligible increase in RAM usage).
 
 Worth noting: NimBLE seems to be significantly better at managing handles for characteristics etc. With Bluedroid, it was necessary to increase handles on service creation.
+
+# FastLED and mp3 decoding co-existence notes
+
+The Task running FastLED's `show()` *MUST* have higher priority than the mp3 decoding task (which runs on core 1 as well). Otherwise, `FastLED.show()` will somehow lock up and never recover, even when mp3 decoding stops taking all available ticks.
+
+Similarly, if `FastLED.show()` is in `loop()`, it will lock up the main loop (because `loop()`'s task prority is 1).
+
+(FREERTOS reminder: priority 0 is the lowest, `configMAX_PRIORITIES -1` is the highest)

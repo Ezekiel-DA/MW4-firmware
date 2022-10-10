@@ -24,6 +24,17 @@ LightDeviceService* pedestalStrip = nullptr;
 
 MusicService* musicService = nullptr;
 
+void fastLEDShowTask(void* params) {
+  static auto prev = millis();
+  while (1) {
+    auto now = millis();
+    if (now - prev >= 10) {
+      FastLED.show();
+      prev = now;
+    }
+  }
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -66,9 +77,10 @@ void setup()
 
   BLEDevice::startAdvertising();
 
-  Serial.print("MW4 init complete - running version: "); Serial.println(FW_VERSION);
+  // put FastLED.show() in its own task with a priority higher than loop() (1) AND higher than MP3 decoding (5)
+  xTaskCreate(fastLEDShowTask, "fastLED", 10000, nullptr, 8, nullptr);
 
-  //xTaskCreate(ledUpdateTask, "main loop", 20000, nullptr, 3, nullptr);
+  Serial.print("MW4 init complete - running version: "); Serial.println(FW_VERSION);
 }
 
 std::string title;
@@ -111,8 +123,6 @@ void loop()
   backUStrip->update(altMode);
   backScreenStrip->update(altMode);
   pedestalStrip->update(altMode);
-
-  FastLED.show();
 }
 
 void audio_id3data(const char *info){  //id3 metadata
@@ -125,5 +135,5 @@ void audio_id3data(const char *info){  //id3 metadata
 }
 
 void audio_eof_mp3(const char *info) {
-  esp_restart();
+  Serial.println("mp3 playback ended");
 }
