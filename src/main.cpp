@@ -25,12 +25,18 @@ LightDeviceService* pedestalStrip = nullptr;
 MusicService* musicService = nullptr;
 
 void fastLEDShowTask(void* params) {
+  static uint32_t loopNum = 0;
+
   static auto prev = millis();
   while (1) {
     auto now = millis();
     if (now - prev >= 10) {
       FastLED.show();
       prev = now;
+
+      if (loopNum++ % 100 == 0) {
+        Serial.print("FastLED Task Loop #"); Serial.println(loopNum);
+      }
     }
   }
 }
