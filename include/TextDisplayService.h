@@ -41,4 +41,5 @@ private:
 
 template<uint8_t DATA_PIN> void addLEDsToTextDisplayService(TextDisplayService* iTextDisplayService) {
   iTextDisplayService->controller = &FastLED.addLeds<WS2812B, DATA_PIN, GRB>(iTextDisplayService->leds, STRIPLED_W * STRIPLED_H);
+  iTextDisplayService->controller->setDither(0);
 };

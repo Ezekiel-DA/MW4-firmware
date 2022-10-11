@@ -17,7 +17,7 @@ struct TextDisplaySettings {
   std::string text;
   
   bool scrolling = true;
-  uint8_t scrollSpeed = 50;
+  uint8_t scrollSpeed = 75;
   uint8_t pauseTime = 3;
   
   int16_t offset = 0;

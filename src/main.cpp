@@ -37,6 +37,7 @@ void fastLEDShowTask(void* params) {
 
       if (loopNum++ % 100 == 0) {
         Serial.print("FastLED Task Loop #"); Serial.println(loopNum);
+        //Serial.println(uxTaskGetStackHighWaterMark(NULL));
       }
     }
   }
@@ -89,7 +90,7 @@ void setup()
   BLEDevice::startAdvertising();
 
   // put FastLED.show() in its own task with a priority higher than loop() (1) AND higher than MP3 decoding (5)
-  xTaskCreate(fastLEDShowTask, "fastLED", 10000, nullptr, 6, nullptr);
+  xTaskCreate(fastLEDShowTask, "fastLED", 2048, nullptr, 6, nullptr);
 
   Serial.print("MW4 init complete - running version: "); Serial.println(FW_VERSION);
 }
@@ -107,13 +108,6 @@ void loop()
   if (pressed) {
     musicService->play();
   }
-
-  // if (altMode) {
-  //   io.digitalWrite(SX1509_STATUS_LED_PIN, HIGH);
-  //   frontText->settingsAlt.text = artist + " - " + title;
-  // } else {
-  //   io.digitalWrite(SX1509_STATUS_LED_PIN, LOW);
-  // }
 
   if (!deviceConnected && oldDeviceConnected) {
     delay(100);
@@ -139,6 +133,8 @@ void loop()
   backUStrip->update(altMode);
   backScreenStrip->update(altMode);
   pedestalStrip->update(altMode);
+
+  // FastLED.show();
 }
 
 void audio_id3data(const char *info){  //id3 metadata
