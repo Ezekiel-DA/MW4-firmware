@@ -19,7 +19,7 @@ BLECharacteristic* TextDisplayService::createCharacteristic(const char** uuids, 
   return characteristic;
 }
 
-void TextDisplayService::createBLECharacteristics(TextDisplayServiceSettings& iSettings, bool iAltMode) {
+void TextDisplayService::createBLECharacteristics(TextDisplaySettings& iSettings, bool iAltMode) {
   auto frontPanelText = createCharacteristic(MW4_BLE_TEXT_DISPLAY_TEXT_CHARACTERISTIC_UUIDS, "Front text", iAltMode);
   frontPanelText->setValue(iSettings.text);
 
@@ -45,18 +45,15 @@ void TextDisplayService::createBLECharacteristics(TextDisplayServiceSettings& iS
   bgColor->setValue(iSettings.bgColor, 3);
 }
 
-TextDisplayService::TextDisplayService(BLEServer* iServer, const std::string& iDefaultText, const std::string& iDefaultAltText) {
-  this->settings.text = iDefaultText;
-  this->settings.scrolling = true;
-  this->settingsAlt.text = iDefaultAltText;
-  this->settingsAlt.scrolling = false;
+TextDisplayService::TextDisplayService(BLEServer* iServer, TextDisplaySettings* iSettings, TextDisplaySettings* iSettingsAlt)
+      : settings(iSettings), settingsAlt(iSettingsAlt) {
   this->strip = new StripDisplay(FRONT_TEXT_PIN, STRIPLED_W, STRIPLED_H, WRAP_COLUMNS, ORIGIN_TOP_LEFT, this->leds);  
   this->strip->setup(&fixedMedium_6x8);
 
   service = iServer->createService(MW4_BLE_TEXT_DISPLAY_SERVICE_UUID);
 
-  createBLECharacteristics(settings);
-  createBLECharacteristics(settingsAlt, true);
+  createBLECharacteristics(*settings);
+  createBLECharacteristics(*settingsAlt, true);
 
   Serial.println("Text Display init complete.");
 }
@@ -69,40 +66,40 @@ void TextDisplayService::onWrite(BLECharacteristic* characteristic) {
     
     if (id.equals(std::string(MW4_BLE_TEXT_DISPLAY_TEXT_CHARACTERISTIC_UUID))) {
       std::string val = characteristic->getValue();
-      this->settings.text = val;
+      this->settings->text = val;
     } else if (id.equals(std::string(MW4_BLE_TEXT_DISPLAY_TEXT_ALT_CHARACTERISTIC_UUID))) {
       std::string val = characteristic->getValue();
-      this->settingsAlt.text = val;
+      this->settingsAlt->text = val;
     } else if (id.equals(std::string(MW4_BLE_TEXT_DISPLAY_OFFSET_CHARACTERISTIC_UUID))) {
       auto offset = reinterpret_cast<int16_t*>(data);
-      this->settings.offset = *offset;
+      this->settings->offset = *offset;
     } else if (id.equals(std::string(MW4_BLE_TEXT_DISPLAY_OFFSET_ALT_CHARACTERISTIC_UUID))) {
       auto offset = reinterpret_cast<int16_t*>(data);
-      this->settingsAlt.offset = *offset;
+      this->settingsAlt->offset = *offset;
     } else if (id.equals(std::string(MW4_BLE_TEXT_DISPLAY_SCROLLING_CHARACTERISTIC_UUID))) {
-      this->settings.scrolling = (bool) *data;
+      this->settings->scrolling = (bool) *data;
     } else if (id.equals(std::string(MW4_BLE_TEXT_DISPLAY_SCROLLING_ALT_CHARACTERISTIC_UUID))) {
-      this->settingsAlt.scrolling = (bool) *data;
+      this->settingsAlt->scrolling = (bool) *data;
     } else if (id.equals(std::string(MW4_BLE_TEXT_DISPLAY_BRIGHTNESS_CHARACTERISTIC_UUID))) {
-      this->settings.brightness = *data;
+      this->settings->brightness = *data;
     } else if (id.equals(std::string(MW4_BLE_TEXT_DISPLAY_BRIGHTNESS_ALT_CHARACTERISTIC_UUID))) {
-      this->settingsAlt.brightness = *data;
+      this->settingsAlt->brightness = *data;
     } else if (id.equals(std::string(MW4_BLE_TEXT_DISPLAY_FG_COLOR_CHARACTERISTIC_UUID))) {
-      memcpy(this->settings.fgColor, data, 3);
+      memcpy(this->settings->fgColor, data, 3);
     } else if (id.equals(std::string(MW4_BLE_TEXT_DISPLAY_FG_COLOR_ALT_CHARACTERISTIC_UUID))) {
-      memcpy(this->settingsAlt.fgColor, data, 3);
+      memcpy(this->settingsAlt->fgColor, data, 3);
     } else if (id.equals(std::string(MW4_BLE_TEXT_DISPLAY_BG_COLOR_CHARACTERISTIC_UUID))) {
-      memcpy(this->settings.bgColor, data, 3);
+      memcpy(this->settings->bgColor, data, 3);
     } else if (id.equals(std::string(MW4_BLE_TEXT_DISPLAY_BG_COLOR_ALT_CHARACTERISTIC_UUID))) {
-      memcpy(this->settingsAlt.bgColor, data, 3);
+      memcpy(this->settingsAlt->bgColor, data, 3);
     } else if (id.equals(std::string(MW4_BLE_TEXT_DISPLAY_SCROLL_SPEED_CHARACTERISTIC_UUID))) {
-      this->settings.scrollSpeed = *data;
+      this->settings->scrollSpeed = *data;
     } else if (id.equals(std::string(MW4_BLE_TEXT_DISPLAY_SCROLL_SPEED_ALT_CHARACTERISTIC_UUID))) {
-      this->settingsAlt.scrollSpeed = *data;
+      this->settingsAlt->scrollSpeed = *data;
     } else if (id.equals(std::string(MW4_BLE_TEXT_DISPLAY_PAUSE_TIME_CHARACTERISTIC_UUID))) {
-      this->settings.pauseTime = *data;
+      this->settings->pauseTime = *data;
     } else if (id.equals(std::string(MW4_BLE_TEXT_DISPLAY_PAUSE_TIME_ALT_CHARACTERISTIC_UUID))) {
-      this->settingsAlt.pauseTime = *data;
+      this->settingsAlt->pauseTime = *data;
     }
 }
 
@@ -113,15 +110,15 @@ void TextDisplayService::update(bool iAltMode) {
     static auto prev = millis();
 
     auto now = millis();
-    if ((uint16_t)(now - prev) >= settingsToUse.scrollSpeed) {
-        auto text = settingsToUse.text;
+    if ((uint16_t)(now - prev) >= settingsToUse->scrollSpeed) {
+        auto text = settingsToUse->text;
         //Serial.print("Text output: alt mode is "); Serial.print(iAltMode); Serial.print("; text to show: "); Serial.println(text.c_str());
-        auto customOffset = settingsToUse.offset;
-        auto isCustomOffsetOn = !settingsToUse.scrolling;
+        auto customOffset = settingsToUse->offset;
+        auto isCustomOffsetOn = !settingsToUse->scrolling;
         int16_t centerPoint = (text.size() * 6) / 2;
 
-        this->strip->setFgColor(CRGB(settingsToUse.fgColor[0], settingsToUse.fgColor[1], settingsToUse.fgColor[2]));
-        this->strip->setBgColor(CRGB(settingsToUse.bgColor[0], settingsToUse.bgColor[1], settingsToUse.bgColor[2]));
+        this->strip->setFgColor(CRGB(settingsToUse->fgColor[0], settingsToUse->fgColor[1], settingsToUse->fgColor[2]).nscale8_video(settingsToUse->brightness) );
+        this->strip->setBgColor(CRGB(settingsToUse->bgColor[0], settingsToUse->bgColor[1], settingsToUse->bgColor[2]));
         this->strip->setText(text.c_str());
 
         if (isCustomOffsetOn) {
@@ -134,7 +131,7 @@ void TextDisplayService::update(bool iAltMode) {
                 if (offset == ((-STRIPLED_W / 2) + 1 + centerPoint)) {
                     // (TODO: put this in a task instead of blocking and using this hack?)
                     // TODO: restore pause support; disabled for music test
-                    // FastLED.delay(settingsToUse.pauseTime * 1000);  // FastLED.delay calls FastLED.show(), which we want here
+                    // FastLED.delay(settingsToUse->pauseTime * 1000);  // FastLED.delay calls FastLED.show(), which we want here
                 }
             }
 
@@ -143,7 +140,6 @@ void TextDisplayService::update(bool iAltMode) {
             }
         }
 
-        //controller->showLeds(this->settings.brightness);
         prev = now;
     }
 }

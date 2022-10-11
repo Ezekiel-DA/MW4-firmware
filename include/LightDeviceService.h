@@ -1,22 +1,17 @@
 #pragma once
 
 #include <NimBLEDevice.h>
+#define NO_HARDWARE_PIN_SUPPORT
 #include <FastLED.h>
 
-class BLEService;
+#include "settingsManager.h"
 
-struct LightDeviceServiceSettings {
-  uint8_t mode = 0; // steady, pulse,  rainbow pulse, rainbow wave
-  bool state = true; // on / off
-  uint8_t hue = 255;
-  uint8_t saturation = 255;
-  uint8_t value = 255;
-};
+class BLEService;
 
 class LightDeviceService : public BLECharacteristicCallbacks {
 
 public:
-  LightDeviceService(BLEServer* iServer, const size_t& iLen, const std::string& iName, uint8_t id=0);
+  LightDeviceService(BLEServer* iServer, const size_t& iLen, const std::string& iName, LightDeviceSettings* iSettings, LightDeviceSettings* iSettingsAlt);
 
   void update(bool iAltMode=false);  
   void onWrite(BLECharacteristic* characteristic);
@@ -25,8 +20,8 @@ public:
 
   size_t numLEDs;
 
-  LightDeviceServiceSettings settings;
-  LightDeviceServiceSettings settingsAlt;
+  LightDeviceSettings* settings;
+  LightDeviceSettings* settingsAlt;
 
   // HACK avert your eyes
   bool _backScreenHack = false;

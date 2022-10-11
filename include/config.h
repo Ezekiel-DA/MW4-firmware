@@ -2,11 +2,12 @@
 
 #define FW_VERSION 2
 
+#define DEFAULTS_SETTINGS_FILE  "/defaults.json"
+#define USER_SETTINGS_FILE      "/settings.json"
+
 // TODO: CHANGE ME! Defaults for dev device vs costume
-#define BUTTON_PIN        21
-//#define BUTTON_PIN          0 // for testing; use 21 above for the costume
-#define DEFAULT_VOLUME      21
-#define DEFAULT_TRACK       0
+//#define BUTTON_PIN        21
+#define BUTTON_PIN          0 // for testing; use 21 above for the costume
 
 #define PULSE_BPM 20
 
@@ -15,7 +16,7 @@
 #define BRIGHTNESS_LIMIT_AT_WHITE 200 // 200
 
 // actual costume values in comment; use those, or lower for testing
-#define RACETRACK_NUM_LEDS              300      // 300
+#define RACETRACK_NUM_LEDS              5      // 300
 
 #define BOTTOM_V_NUM_LEDS               70      // 70
 
@@ -26,7 +27,7 @@
 #define BACK_SCREEN_NUM_LEDS            155      // 155
 #define BACK_SCREEN_NUM_BACKLIGHT_LEDS  73      // 73 // just the backlight bit, which precedes the rest (0-82: backlight; 83-154: perimeter)
 
-#define PEDESTAL_NUM_LEDS               300     // 300
+#define PEDESTAL_NUM_LEDS               5       // 300
 
 #define LED_D1          13
 #define LED_D2          12

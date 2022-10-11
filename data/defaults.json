@@ -1,0 +1,55 @@
+{
+    "musicService": {
+        "state": true,
+        "volume": 2,
+        "track": 0
+    },
+    "frontText": {
+        "default": {
+            "state": true,
+            "text": "TEAM SAVANNAH",
+            "scrolling": true,
+            "fgColor": "0xFFFFFF",
+            "bgColor": "0x000000"
+        },
+        "alt": {
+            "state": true,
+            "text": "I WANT YOU",
+            "scrolling": false,
+            "fgColor": "0xFFFFFF",
+            "bgColor": "0x000000"
+        }
+    },
+    "chairLights": {
+        "default": {
+            "state": true,
+            "mode": 3,
+            "hue": 255,
+            "saturation": 255,
+            "value": 255
+        },
+        "alt": {
+            "state": true,
+            "mode": 0,
+            "hue": 255,
+            "saturation": 0,
+            "value": 180
+        }
+    },
+    "pedestalLights": {
+        "default": {
+            "state": true,
+            "mode": 1,
+            "hue": 255,
+            "saturation": 255,
+            "value": 255
+        },
+        "alt": {
+            "state": true,
+            "mode": 1,
+            "hue": 255,
+            "saturation": 0,
+            "value": 255
+        }
+    }
+}

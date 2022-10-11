@@ -1,7 +1,10 @@
 #pragma once
 
 #include <NimBLEDevice.h>
+#define NO_HARDWARE_PIN_SUPPORT
 #include <FastLED.h>
+
+#include "settingsManager.h"
 
 class StripDisplay;
 
@@ -10,22 +13,10 @@ class StripDisplay;
 
 #define STARTING_OFFSET -STRIPLED_W + 1 // this is a function of the length of the panel and is independent of the length of the displayed text
 
-struct TextDisplayServiceSettings {
-  std::string text;
-  bool scrolling = true;
-  uint8_t scrollSpeed = 50;
-  uint8_t pauseTime = 3;
-  int16_t offset = 0;
-  uint8_t brightness = 255;
-
-  uint8_t fgColor[3] = {255, 255, 255};
-  uint8_t bgColor[3] = {0, 0, 0};
-};
-
 class TextDisplayService : public BLECharacteristicCallbacks {
 
 public:
-  TextDisplayService(BLEServer* iServer, const std::string& iDefaultText, const std::string& iDefaultAltText);
+  TextDisplayService(BLEServer* iServer, TextDisplaySettings* iSettings, TextDisplaySettings* iSettingsAlt);
 
   void update(bool iAltMode);
   
@@ -33,8 +24,8 @@ public:
 
   BLEService* service = nullptr;
 
-  TextDisplayServiceSettings settings;
-  TextDisplayServiceSettings settingsAlt;
+  TextDisplaySettings* settings;
+  TextDisplaySettings* settingsAlt;
 
   template<uint8_t DATA_PIN> friend void addLEDsToTextDisplayService(TextDisplayService* iTextDisplayService);
 
@@ -43,7 +34,7 @@ private:
   StripDisplay* strip;
   CLEDController* controller = nullptr;
 
-  void createBLECharacteristics(TextDisplayServiceSettings& settings, bool iAltMode=false);
+  void createBLECharacteristics(TextDisplaySettings& settings, bool iAltMode=false);
 
   BLECharacteristic* createCharacteristic(const char** uuids, const char* iDisplayName, bool iAltMode=false);
 };

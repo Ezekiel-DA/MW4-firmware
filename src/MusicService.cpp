@@ -122,26 +122,26 @@ bool audioConnecttoSD(const char* filename){
     return RX.ret;
 }
 
-MusicService::MusicService(BLEServer* iServer) {
+MusicService::MusicService(BLEServer* iServer, MusicSettings* iSettings) : settings(iSettings) {
   audioInit();
 
-  audioSetVolume(this->volume);
+  audioSetVolume(this->settings->volume);
 
   this->service = iServer->createService(MW4_BLE_MUSIC_CONTROL_SERVICE_UUID);
 
   auto stateCharacteristic = service->createCharacteristic(MW4_BLE_MUSIC_CONTROL_STATE_CHARACTERISTIC, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE |NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::INDICATE);
   stateCharacteristic->setCallbacks(this);
-  stateCharacteristic->setValue((uint8_t*) &(this->state), 1);
+  stateCharacteristic->setValue((uint8_t*) &(this->settings->state), 1);
   attachUserDescriptionToCharacteristic(stateCharacteristic, "State");
 
   auto volumeCharacteristic = service->createCharacteristic(MW4_BLE_MUSIC_CONTROL_VOLUME_CHARACTERISTIC, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE |NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::INDICATE);
   volumeCharacteristic->setCallbacks(this);
-  volumeCharacteristic->setValue(&(this->volume), 1);
+  volumeCharacteristic->setValue(&(this->settings->volume), 1);
   attachUserDescriptionToCharacteristic(volumeCharacteristic, "Volume");
 
   auto trackCharacteristic = service->createCharacteristic(MW4_BLE_MUSIC_CONTROL_TRACK_CHARACTERISTIC, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE |NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::INDICATE);
   trackCharacteristic->setCallbacks(this);
-  trackCharacteristic->setValue(&(this->track), 1);
+  trackCharacteristic->setValue(&(this->settings->track), 1);
   attachUserDescriptionToCharacteristic(trackCharacteristic, "Track");
 }
 
@@ -152,17 +152,17 @@ void MusicService::onWrite(BLECharacteristic* characteristic) {
     uint8_t* data = (uint8_t*)safeData.data();
 
     if (id.equals(std::string(MW4_BLE_MUSIC_CONTROL_TRACK_CHARACTERISTIC))) {
-      this->track = *data;
+      this->settings->track = *data;
     } else if (id.equals(std::string(MW4_BLE_MUSIC_CONTROL_VOLUME_CHARACTERISTIC))) {
-      this->volume = *data;
-      audioSetVolume(this->volume);
+      this->settings->volume = *data;
+      audioSetVolume(this->settings->volume);
     } else if (id.equals(std::string(MW4_BLE_STATE_CHARACTERISTIC_UUID))) {
-      this->state = (*data) != 0;
+      this->settings->state = (*data) != 0;
     }
 }
 
 void MusicService::play() {
   srand(millis());
-  this->track = rand() % 12;
-  audioConnecttoSD(trackMapping[this->track]);
+  this->settings->track = rand() % 12;
+  audioConnecttoSD(trackMapping[this->settings->track]);
 }

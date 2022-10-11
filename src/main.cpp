@@ -11,6 +11,7 @@ using namespace ace_button;
 #include "LightDeviceService.h"
 #include "MusicService.h"
 #include "SD_FS.h"
+#include "settingsManager.h"
 
 CostumeControlService* costumeController = nullptr;
 TextDisplayService* frontText = nullptr;
@@ -48,27 +49,31 @@ void setup()
   setupButtons();
   setupSD();
 
+  initSettings();
+
   auto bleServer = setupBLE();
   costumeController = new CostumeControlService(bleServer, FW_VERSION);
 
   // LED strips
-  frontText = new TextDisplayService(bleServer, "TEAM SAVANNAH", "I WANT YOU");
+  frontText = new TextDisplayService(bleServer, getTextDisplaySettings(), getTextDisplaySettings(true));
   addLEDsToTextDisplayService<FRONT_TEXT_PIN>(frontText);
-  racetrackStrip = new LightDeviceService(bleServer, RACETRACK_NUM_LEDS, "Racetrack");
+
+  racetrackStrip = new LightDeviceService(bleServer, RACETRACK_NUM_LEDS, "Racetrack", getChairLightSettings(), getChairLightSettings(true));
   addLEDsToLightDeviceService<RACETRACK_STRIP_PIN>(racetrackStrip);
-  bottomVStrip = new LightDeviceService(bleServer, BOTTOM_V_NUM_LEDS, "Bottom V");
+  bottomVStrip = new LightDeviceService(bleServer, BOTTOM_V_NUM_LEDS, "Bottom V", getChairLightSettings(), getChairLightSettings(true));
   addLEDsToLightDeviceService<BOTTOM_V_PIN>(bottomVStrip);
-  frontUStrip = new LightDeviceService(bleServer, FRONT_U_NUM_LEDS, "Front U");
+  frontUStrip = new LightDeviceService(bleServer, FRONT_U_NUM_LEDS, "Front U", getChairLightSettings(), getChairLightSettings(true));
   addLEDsToLightDeviceService<FRONT_U_PIN>(frontUStrip);
-  backUStrip = new LightDeviceService(bleServer, BACK_U_NUM_LEDS, "Back U");
+  backUStrip = new LightDeviceService(bleServer, BACK_U_NUM_LEDS, "Back U", getChairLightSettings(), getChairLightSettings(true));
   addLEDsToLightDeviceService<BACK_U_PIN>(backUStrip);
-  backScreenStrip = new LightDeviceService(bleServer, BACK_SCREEN_NUM_LEDS, "Back screen");
+  backScreenStrip = new LightDeviceService(bleServer, BACK_SCREEN_NUM_LEDS, "Back screen", getChairLightSettings(), getChairLightSettings(true));
   backScreenStrip->_backScreenHack = true;
   addLEDsToLightDeviceService<BACK_SCREEN_PIN>(backScreenStrip);
-  pedestalStrip = new LightDeviceService(bleServer, PEDESTAL_NUM_LEDS, "Pedestal");
+
+  pedestalStrip = new LightDeviceService(bleServer, PEDESTAL_NUM_LEDS, "Pedestal", getPedestalLightSettings(), getPedestalLightSettings(true));
   addLEDsToLightDeviceService<PEDESTAL_PIN>(pedestalStrip);
 
-  musicService = new MusicService(bleServer);
+  musicService = new MusicService(bleServer, getMusicSettings());
 
   costumeController->service->start();
   frontText->service->start();
@@ -84,7 +89,7 @@ void setup()
   BLEDevice::startAdvertising();
 
   // put FastLED.show() in its own task with a priority higher than loop() (1) AND higher than MP3 decoding (5)
-  xTaskCreate(fastLEDShowTask, "fastLED", 10000, nullptr, 8, nullptr);
+  xTaskCreate(fastLEDShowTask, "fastLED", 10000, nullptr, 6, nullptr);
 
   Serial.print("MW4 init complete - running version: "); Serial.println(FW_VERSION);
 }
