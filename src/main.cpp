@@ -81,6 +81,11 @@ void loop()
 {
   checkButtons();
 
+  if (getReset()) {
+    Serial.print("Resetting settings to defaults and rebooting...");
+    resetSettings();
+  }
+
   bool altMode = getAltMode();
   bool pressed = getAndResetPressed();
 
@@ -114,6 +119,8 @@ void loop()
   pedestalStrip->update(altMode);
 
   FastLED.show();
+
+  saveSettings();
 }
 
 void audio_id3data(const char *info){  //id3 metadata

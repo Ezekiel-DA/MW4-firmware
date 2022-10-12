@@ -10,6 +10,7 @@ AceButton mainButton(&mainButtonConfig);
 
 bool altMode = false;
 bool pressed = false;
+bool resetButton = false;
 
 void timerCB(TimerHandle_t xTimer) {
   altMode = false;
@@ -20,14 +21,21 @@ TimerHandle_t altModeResetTimerHandle = xTimerCreate("altModeResetTimer", pdMS_T
 
 void mainButtonEventHandler(AceButton* button, uint8_t eventType, uint8_t buttonState)
 {
+  static long pressedAt = 0;
   switch (eventType)
   {
     case AceButton::kEventPressed:
+      pressedAt = millis();
       pressed = true;
       break;
     case AceButton::kEventReleased:
+      auto elapsed = millis() - pressedAt;
       altMode = true;
       xTimerStart(altModeResetTimerHandle, 0); // this will conveniently reset the timer if it was running
+
+      if (elapsed > 10 * 1000) {
+        resetButton = true;
+      }
       break;
   }
 }
@@ -59,4 +67,8 @@ bool getAndResetPressed() {
   auto ret = pressed;
   pressed = false;
   return ret;
+}
+
+bool getReset() {
+  return resetButton;
 }

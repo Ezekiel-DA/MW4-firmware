@@ -5,3 +5,4 @@ void checkButtons();
 
 bool getAltMode();
 bool getAndResetPressed();
+bool getReset();

@@ -55,25 +55,29 @@ LightDeviceService::LightDeviceService(BLEServer* iServer, const size_t& iLen, c
 }
 
 void LightDeviceService::onWrite(BLECharacteristic* characteristic) {
-    BLEUUID id = characteristic->getUUID();
+  BLEUUID id = characteristic->getUUID();
 
-    std::string safeData = characteristic->getValue();
-    uint8_t* data = (uint8_t*)safeData.data();
+  std::string safeData = characteristic->getValue();
+  uint8_t* data = (uint8_t*)safeData.data();
 
-    if (id.equals(std::string(MW4_BLE_HUE_CHARACTERISTIC_UUID))) {
-      this->settings->hue = *data;
-    } else if (id.equals(std::string(MW4_BLE_SATURATION_CHARACTERISTIC_UUID))) {
-      this->settings->saturation = *data;
-    } else if (id.equals(std::string(MW4_BLE_VALUE_CHARACTERISTIC_UUID))) {
-      this->settings->value = *data;
-    } else if (id.equals(std::string(MW4_BLE_STATE_CHARACTERISTIC_UUID))) {
-      this->settings->state = (*data) != 0;
+  portENTER_CRITICAL(&settingsMutex);
 
-    } else if (id.equals(std::string(MW4_BLE_MODE_CHARACTERISTIC_UUID))) {
-      this->settings->mode = *data;
-    }
+  if (id.equals(std::string(MW4_BLE_HUE_CHARACTERISTIC_UUID))) {
+    this->settings->hue = *data;
+  } else if (id.equals(std::string(MW4_BLE_SATURATION_CHARACTERISTIC_UUID))) {
+    this->settings->saturation = *data;
+  } else if (id.equals(std::string(MW4_BLE_VALUE_CHARACTERISTIC_UUID))) {
+    this->settings->value = *data;
+  } else if (id.equals(std::string(MW4_BLE_STATE_CHARACTERISTIC_UUID))) {
+    this->settings->state = (*data) != 0;
 
-    saveSettings();
+  } else if (id.equals(std::string(MW4_BLE_MODE_CHARACTERISTIC_UUID))) {
+    this->settings->mode = *data;
+  }
+
+  portEXIT_CRITICAL(&settingsMutex);
+
+  markSettingsModified();
 }
 
 void LightDeviceService::globalAnimationUpdate() {
