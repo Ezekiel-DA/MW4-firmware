@@ -3,8 +3,6 @@
 #include <Arduino.h>
 #include <NimBLEDevice.h>
 
-#define NO_HARDWARE_PIN_SUPPORT
-#include <FastLED.h>
 #include <string>
 
 #include "config.h"
