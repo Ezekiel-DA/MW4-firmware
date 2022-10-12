@@ -1,6 +1,8 @@
 #pragma once
 
 #include <NimBLEDevice.h>
+
+#define FASTLED_RMT_MAX_CHANNELS 4 // required to work around a bug in FastLED's ESP32 SMT driver?
 #include <FastLED.h>
 
 class StripDisplay;
