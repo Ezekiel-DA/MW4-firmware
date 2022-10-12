@@ -16,7 +16,7 @@
 #define BRIGHTNESS_LIMIT_AT_WHITE 200 // 200
 
 // actual costume values in comment; use those, or lower for testing
-#define RACETRACK_NUM_LEDS              5      // 300
+#define RACETRACK_NUM_LEDS              300      // 300
 
 #define BOTTOM_V_NUM_LEDS               70      // 70
 
@@ -27,7 +27,7 @@
 #define BACK_SCREEN_NUM_LEDS            155      // 155
 #define BACK_SCREEN_NUM_BACKLIGHT_LEDS  73      // 73 // just the backlight bit, which precedes the rest (0-82: backlight; 83-154: perimeter)
 
-#define PEDESTAL_NUM_LEDS               5       // 300
+#define PEDESTAL_NUM_LEDS               300       // 300
 
 #define LED_D1          13
 #define LED_D2          12

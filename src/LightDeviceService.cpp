@@ -72,6 +72,8 @@ void LightDeviceService::onWrite(BLECharacteristic* characteristic) {
     } else if (id.equals(std::string(MW4_BLE_MODE_CHARACTERISTIC_UUID))) {
       this->settings->mode = *data;
     }
+
+    saveSettings();
 }
 
 void LightDeviceService::globalAnimationUpdate() {
@@ -144,6 +146,4 @@ void LightDeviceService::update(bool iAltMode) {
         break;
     }
   }
-
-  //controller->showLeds();
 }

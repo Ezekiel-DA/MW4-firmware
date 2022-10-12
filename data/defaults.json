@@ -9,13 +9,17 @@
             "state": true,
             "text": "TEAM SAVANNAH",
             "scrolling": true,
+            "scrollSpeed": 100,
+            "pauseTime": 2,
             "fgColor": "0xFFFFFF",
             "bgColor": "0x000000"
         },
         "alt": {
             "state": true,
             "text": "I WANT YOU",
-            "scrolling": false,
+            "scrolling": true,
+            "scrollSpeed": 50,
+            "pauseTime": 5,
             "fgColor": "0xFFFFFF",
             "bgColor": "0x000000"
         }
@@ -23,14 +27,14 @@
     "chairLights": {
         "default": {
             "state": true,
-            "mode": 3,
+            "mode": 1,
             "hue": 255,
-            "saturation": 255,
+            "saturation": 0,
             "value": 255
         },
         "alt": {
             "state": true,
-            "mode": 0,
+            "mode": 3,
             "hue": 255,
             "saturation": 0,
             "value": 180

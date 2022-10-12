@@ -35,9 +35,15 @@ struct MusicSettings {
 
 /**
  * @brief Reads settings from default and user settings files and initializes auto save.
- * Auto save persists current settings to files at regular intervals if needed.
+ * Auto save persists current settings to files at regular intervals.
  */
 void initSettings();
+
+/**
+ * @brief Notify that we want settings saved; this save is NOT synchronous and is instead performed in a background task.
+ * 
+ */
+void saveSettings();
 
 // delete user settings AND REBOOT to reload
 void resetSettings();

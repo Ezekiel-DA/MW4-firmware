@@ -14,6 +14,11 @@ class StripDisplay;
 
 #define STARTING_OFFSET -STRIPLED_W + 1 // this is a function of the length of the panel and is independent of the length of the displayed text
 
+/**
+ * @brief Service to handle a text display made up of two 8x32 LED panels.
+ * WARNING: THIS SERVICE IS A MESS OF GLOBALS AND WILL NOT SUPPORT MULTIPLE INSTANCES AT THIS TIME!
+ * 
+ */
 class TextDisplayService : public BLECharacteristicCallbacks {
 
 public:

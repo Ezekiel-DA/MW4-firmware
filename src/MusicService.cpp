@@ -159,10 +159,11 @@ void MusicService::onWrite(BLECharacteristic* characteristic) {
     } else if (id.equals(std::string(MW4_BLE_STATE_CHARACTERISTIC_UUID))) {
       this->settings->state = (*data) != 0;
     }
+
+    saveSettings();
 }
 
 void MusicService::play() {
   srand(millis());
-  this->settings->track = rand() % 12;
-  audioConnecttoSD(trackMapping[this->settings->track]);
+  audioConnecttoSD(trackMapping[rand() % 12]);
 }

@@ -19,6 +19,8 @@ TextDisplaySettings textSettingsAlt;
 
 MusicSettings musicSettings;
 
+TaskHandle_t settingsSaverTask = nullptr;
+
 LightDeviceSettings getLightSettingsForDevice(JsonDocument* doc, const char* device, bool alt) {
   LightDeviceSettings ret;
 
@@ -39,6 +41,8 @@ TextDisplaySettings getTextSettings(JsonDocument* doc, bool alt) {
   ret.state = (*doc)[device][alt ? "alt" : "default"]["state"];
   ret.text = (*doc)[device][alt ? "alt" : "default"]["text"].as<std::string>();
   ret.scrolling = (*doc)[device][alt ? "alt" : "default"]["scrolling"];
+  ret.scrollSpeed = (*doc)[device][alt ? "alt" : "default"]["scrollSpeed"];
+  ret.pauseTime = (*doc)[device][alt ? "alt" : "default"]["pauseTime"];
   long fg = strtol((*doc)[device][alt ? "alt" : "default"]["fgColor"], NULL, 16);
   long bg = strtol((*doc)[device][alt ? "alt" : "default"]["bgColor"], NULL, 16);
   
@@ -57,11 +61,14 @@ void autoSaveTask(void* params) {
   while(1) {
     vTaskDelay(5000 / portTICK_PERIOD_MS);
 
-    // if (settingsModified) {
+    // if (modified) {
 
-    //   settingsModified = false;
     // }
   }
+}
+
+void saveSettings() {
+
 }
 
 void initSettings() {
@@ -89,7 +96,7 @@ void initSettings() {
   musicSettings.volume = defaultSettingsDoc["musicService"]["volume"];
   musicSettings.track = defaultSettingsDoc["musicService"]["track"];
 
-  //xTaskCreate(autoSaveTask, "autosave settings", 8192, nullptr, 1, nullptr);
+  xTaskCreate(autoSaveTask, "autosave settings", 8192, nullptr, 1, &settingsSaverTask);
 };
 
 void resetSettings() {
