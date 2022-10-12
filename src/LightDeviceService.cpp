@@ -3,7 +3,6 @@
 #include <Arduino.h>
 #include <NimBLEDevice.h>
 
-#include <FastLED.h>
 #include <string>
 
 #include "config.h"
