@@ -20,6 +20,9 @@ BLECharacteristic* TextDisplayService::createCharacteristic(const char** uuids, 
 }
 
 void TextDisplayService::createBLECharacteristics(TextDisplaySettings& iSettings, bool iAltMode) {
+  auto state = createCharacteristic(MW4_BLE_STATE_CHARACTERISTIC_UUIDS, "State", iAltMode);
+  state->setValue(iSettings.state);
+
   auto frontPanelText = createCharacteristic(MW4_BLE_TEXT_DISPLAY_TEXT_CHARACTERISTIC_UUIDS, "Front text", iAltMode);
   frontPanelText->setValue(iSettings.text);
 
@@ -65,8 +68,11 @@ void TextDisplayService::onWrite(BLECharacteristic* characteristic) {
   uint8_t* data = (uint8_t*)safeData.data();
 
   portENTER_CRITICAL(&settingsMutex);
-
-  if (id.equals(std::string(MW4_BLE_TEXT_DISPLAY_TEXT_CHARACTERISTIC_UUID))) {
+  if (id.equals(std::string(MW4_BLE_STATE_CHARACTERISTIC_UUID))) {
+    this->settings->state = (bool)*data;
+  } else if (id.equals(std::string(MW4_BLE_STATE_ALT_CHARACTERISTIC_UUID))) {
+    this->settingsAlt->state = (bool)*data;
+  } else if (id.equals(std::string(MW4_BLE_TEXT_DISPLAY_TEXT_CHARACTERISTIC_UUID))) {
     this->settings->text = safeData;
   } else if (id.equals(std::string(MW4_BLE_TEXT_DISPLAY_TEXT_ALT_CHARACTERISTIC_UUID))) {
     this->settingsAlt->text = safeData;
@@ -116,6 +122,12 @@ void TextDisplayService::update(bool iAltMode) {
   static auto prev = millis();
   auto now = millis();
   auto elapsed = now - prev;
+
+  if (settingsToUse->state == false) {
+    fill_solid(this->leds, STRIPLED_W * STRIPLED_H, CRGB::Black);
+    prev = now;
+    return;
+  }
 
   if (!isPaused || elapsed >= settingsToUse->pauseTime * 1000) {
     if (elapsed >= settingsToUse->scrollSpeed) {

@@ -78,12 +78,28 @@
 
 // Light controlling services; multiple instances allowed
 #define MW4_BLE_LIGHT_DEVICE_SERVICE_UUID                           "0ba35e90-f55f-4f15-9347-3dc4a0287881"
+
 #define MW4_BLE_ID_CHARACTERISTIC_UUID                                          "63c62656-807f-4db4-97d3-94095962acf8"
+
 #define MW4_BLE_STATE_CHARACTERISTIC_UUID                                       "c2af353b-e5fc-4bdf-b743-5d226f1198a2"
+#define MW4_BLE_STATE_ALT_CHARACTERISTIC_UUID                                   "593d1195-5918-4db4-8077-c2f0fe7cee4c"
+static const char* MW4_BLE_STATE_CHARACTERISTIC_UUIDS[2] =                      {MW4_BLE_STATE_CHARACTERISTIC_UUID, MW4_BLE_STATE_ALT_CHARACTERISTIC_UUID};
+
 #define MW4_BLE_MODE_CHARACTERISTIC_UUID                                        "b54fc13b-4374-4a6f-861f-dd198f88f299"
+#define MW4_BLE_MODE_ALT_CHARACTERISTIC_UUID                                    "757a6893-19ec-4d29-aed0-93a72deea093"
+static const char* MW4_BLE_MODE_CHARACTERISTIC_UUIDS[2] =                       {MW4_BLE_MODE_CHARACTERISTIC_UUID, MW4_BLE_MODE_ALT_CHARACTERISTIC_UUID};
+
 #define MW4_BLE_HUE_CHARACTERISTIC_UUID                                         "19dfe175-aa12-404b-843d-b625937cffff" 
+#define MW4_BLE_HUE_ALT_CHARACTERISTIC_UUID                                     "d69b013f-9495-4809-924c-367b1a35f565" 
+static const char* MW4_BLE_HUE_CHARACTERISTIC_UUIDS[2] =                        {MW4_BLE_HUE_CHARACTERISTIC_UUID, MW4_BLE_HUE_ALT_CHARACTERISTIC_UUID};
+
 #define MW4_BLE_SATURATION_CHARACTERISTIC_UUID                                  "946d22e6-2b2f-49e7-b941-150b023f2261"
+#define MW4_BLE_SATURATION_ALT_CHARACTERISTIC_UUID                              "e27a37e8-fd5e-47f3-bff2-b07a357cb8e4"
+static const char* MW4_BLE_SATURATION_CHARACTERISTIC_UUIDS[2] =                 {MW4_BLE_SATURATION_CHARACTERISTIC_UUID, MW4_BLE_SATURATION_ALT_CHARACTERISTIC_UUID};
+
 #define MW4_BLE_VALUE_CHARACTERISTIC_UUID                                       "6c5df188-2e69-4f2f-b4ab-9d2b76ef7aa9"
+#define MW4_BLE_VALUE_ALT_CHARACTERISTIC_UUID                                   "52f49348-347b-46b9-ba39-3a2c7dfd51a2"
+static const char* MW4_BLE_VALUE_CHARACTERISTIC_UUIDS[2] =                      {MW4_BLE_VALUE_CHARACTERISTIC_UUID, MW4_BLE_VALUE_ALT_CHARACTERISTIC_UUID};
 
 
 // Text display matrix service

@@ -16,12 +16,8 @@ using namespace ace_button;
 CostumeControlService* costumeController = nullptr;
 TextDisplayService* frontText = nullptr;
 
-LightDeviceService* racetrackStrip = nullptr;
-LightDeviceService* bottomVStrip = nullptr;
-LightDeviceService* frontUStrip = nullptr;
-LightDeviceService* backUStrip = nullptr;
-LightDeviceService* backScreenStrip = nullptr;
-LightDeviceService* pedestalStrip = nullptr;
+LightDeviceService* chairLights = nullptr;
+LightDeviceService* pedestalLights = nullptr;
 
 MusicService* musicService = nullptr;
 
@@ -37,38 +33,42 @@ void setup()
   auto bleServer = setupBLE();
   costumeController = new CostumeControlService(bleServer, FW_VERSION);
 
-  // LED strips
+  // define LED strip channels
+  auto racetrackChannel = new LEDChannel(RACETRACK_NUM_LEDS);
+  addLEDsToChannel<RACETRACK_STRIP_PIN>(racetrackChannel);
+  auto bottomVChannel = new LEDChannel(BOTTOM_V_NUM_LEDS);
+  addLEDsToChannel<BOTTOM_V_PIN>(bottomVChannel);
+  auto frontUChannel = new LEDChannel(FRONT_U_NUM_LEDS);
+  addLEDsToChannel<FRONT_U_PIN>(frontUChannel);
+  auto backUChannel = new LEDChannel(BACK_U_NUM_LEDS);
+  addLEDsToChannel<BACK_U_PIN>(backUChannel);
+  auto backScreenChannel = new LEDChannel(BACK_SCREEN_NUM_LEDS, /*backScreenHack*/true);
+  addLEDsToChannel<BACK_SCREEN_PIN>(backScreenChannel);
+  auto pedestalChannel = new LEDChannel(PEDESTAL_NUM_LEDS);
+  addLEDsToChannel<PEDESTAL_PIN>(pedestalChannel);
+  
+  // define front text service and attach LEDs
   frontText = new TextDisplayService(bleServer, getTextDisplaySettings(), getTextDisplaySettings(true));
   addLEDsToTextDisplayService<FRONT_TEXT_PIN>(frontText);
 
-  racetrackStrip = new LightDeviceService(bleServer, RACETRACK_NUM_LEDS, "Racetrack", getChairLightSettings(), getChairLightSettings(true));
-  addLEDsToLightDeviceService<RACETRACK_STRIP_PIN>(racetrackStrip);
-  bottomVStrip = new LightDeviceService(bleServer, BOTTOM_V_NUM_LEDS, "Bottom V", getChairLightSettings(), getChairLightSettings(true));
-  addLEDsToLightDeviceService<BOTTOM_V_PIN>(bottomVStrip);
-  frontUStrip = new LightDeviceService(bleServer, FRONT_U_NUM_LEDS, "Front U", getChairLightSettings(), getChairLightSettings(true));
-  addLEDsToLightDeviceService<FRONT_U_PIN>(frontUStrip);
-  backUStrip = new LightDeviceService(bleServer, BACK_U_NUM_LEDS, "Back U", getChairLightSettings(), getChairLightSettings(true));
-  addLEDsToLightDeviceService<BACK_U_PIN>(backUStrip);
-  backScreenStrip = new LightDeviceService(bleServer, BACK_SCREEN_NUM_LEDS, "Back screen", getChairLightSettings(), getChairLightSettings(true));
-  backScreenStrip->_backScreenHack = true;
-  addLEDsToLightDeviceService<BACK_SCREEN_PIN>(backScreenStrip);
+  // define LED services and attach groups of LED channels to them
+  chairLights = new LightDeviceService(bleServer, "Chair lights", getChairLightSettings(), getChairLightSettings(true), /*id*/1);
+  chairLights->channels.push_back(racetrackChannel);
+  chairLights->channels.push_back(bottomVChannel);
+  chairLights->channels.push_back(frontUChannel);
+  chairLights->channels.push_back(backUChannel);
+  chairLights->channels.push_back(backScreenChannel);
 
-  pedestalStrip = new LightDeviceService(bleServer, PEDESTAL_NUM_LEDS, "Pedestal", getPedestalLightSettings(), getPedestalLightSettings(true));
-  addLEDsToLightDeviceService<PEDESTAL_PIN>(pedestalStrip);
-
+  pedestalLights = new LightDeviceService(bleServer, "Pedestal lights", getPedestalLightSettings(), getPedestalLightSettings(true), /*id*/2);
+  pedestalLights->channels.push_back(pedestalChannel);
+  
   musicService = new MusicService(bleServer, getMusicSettings());
 
   costumeController->service->start();
   frontText->service->start();
-  racetrackStrip->service->start();
-  bottomVStrip->service->start();
-  frontUStrip->service->start();
-  backUStrip->service->start();
-  backScreenStrip->service->start();
-  pedestalStrip->service->start();
-
+  chairLights->service->start();
+  pedestalLights->service->start();
   musicService->service->start();
-
   BLEDevice::startAdvertising();
 
   Serial.print("MW4 init complete - running version: "); Serial.println(FW_VERSION);
@@ -111,12 +111,8 @@ void loop()
   LightDeviceService::globalAnimationUpdate();
 
   frontText->update(altMode);
-  racetrackStrip->update(altMode);
-  bottomVStrip->update(altMode);
-  frontUStrip->update(altMode);
-  backUStrip->update(altMode);
-  backScreenStrip->update(altMode);
-  pedestalStrip->update(altMode);
+  chairLights->update(altMode);
+  pedestalLights->update(altMode);
 
   FastLED.show();
 

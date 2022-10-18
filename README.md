@@ -2,6 +2,9 @@
 
 All literal UUIDs can be found in `config.h` and are referenced by name here.
 
+## Note on "Alt" characteristics
+Specifically for this project, most characteristics have been duplicated to have an "Alt" version; these are used to model a second set of settings to be used on a button trigger (i.e. when the Big Red Button is hit on MW4).
+
 ## Costume controller service
 This service is advertised as `MW4_BLE_COSTUME_CONTROL_SERVICE_UUID`. Centrals (BLE clients, i.e. your phone) should query for this service, connect, then enumerate other (non advertised) services to discover costume capabilities.
 
@@ -28,7 +31,15 @@ NB: an offset of 0 left align texts. An offset of negative panel length (technic
 TODO: as implemented, only one of these can exist, because some underlying variables for the text display and FastLED are shared.
 
 ## Light device service
-TODO: adopt this from MWNext project.
+The `MW4_BLE_LIGHT_DEVICE_SERVICE_UUID` service controls smart LED lights (WS2812B strips). Multiple instances of this service can exist. The following characteristics are exposed:
+* `Object Name (BLE standard 0x2ABE)`: UTF-8 string representing a device selected name for the specific LED strip / channel. Read only.
+* `MW4_BLE_ID_CHARACTERISTIC_UUID`:  1 byte unsigned int identifying the channel. Intended to start at 0. Read only.
+* `MW4_BLE_STATE_CHARACTERISTIC_UUID`: 1 byte unsigned int to enable or disable (set to black) the channel.
+* `MW4_BLE_MODE_CHARACTERISTIC_UUID`: 1 byte unsigned int representing a display mode. Currently: 0 for steady, 1 for pulse, 2 for rainbow fill, 3 for rainbow wave
+* `MW4_BLE_HUE_CHARACTERISTIC_UUID`: 1 byte unsigned int: H in HSV color representation
+* `MW4_BLE_SATURATION_CHARACTERISTIC_UUID`: 1 byte unsigned int: S in HSV color representation
+* `MW4_BLE_VALUE_CHARACTERISTIC_UUID`: 1 byte unsigned int: V in HSV color representation
+
 
 
 # OTA updates
@@ -121,8 +132,10 @@ Worth noting: NimBLE seems to be significantly better at managing handles for ch
 
 # FastLED and mp3 decoding co-existence notes
 
-The Task running FastLED's `show()` *MUST* have higher priority than the mp3 decoding task (which runs on core 1 as well). Otherwise, `FastLED.show()` will somehow lock up and never recover, even when mp3 decoding stops taking all available ticks.
+~~~The Task running FastLED's `show()` *MUST* have higher priority than the mp3 decoding task (which runs on core 1 as well). Otherwise, `FastLED.show()` will somehow lock up and never recover, even when mp3 decoding stops taking all available ticks.
 
 Similarly, if `FastLED.show()` is in `loop()`, it will lock up the main loop (because `loop()`'s task prority is 1).
 
-(FREERTOS reminder: priority 0 is the lowest, `configMAX_PRIORITIES -1` is the highest)
+(FREERTOS reminder: priority 0 is the lowest, `configMAX_PRIORITIES -1` is the highest)~~~
+
+All of these introduce artifacts (separate task for FastLED) or eventually freeze anyway (increasing priority) etc. The current fix is to force FastLED to only use one RMT channel via `#define FASTLED_RMT_MAX_CHANNELS 1`.
