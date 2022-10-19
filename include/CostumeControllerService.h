@@ -17,6 +17,8 @@ public:
 
   bool dangerZone = false;
 
+  bool OTAUpdateInProgress = false;
+
 private:
   uint8_t _fwVersion;
 };

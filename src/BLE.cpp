@@ -51,14 +51,11 @@ void ServerCallbacks::onConnect(BLEServer* server, ble_gap_conn_desc* desc) {
   // Min/Max Intervals: 1.25 millisecond increments.
   // Latency: number of intervals allowed to skip.
   // Timeout: 10 millisecond increments, try for 5x interval time for best results.
-  server->updateConnParams(desc->conn_handle, /*min conn interval*/12, /*max conn interval*/12, /*latency*/2, /*timeout*/100);
+  server->updateConnParams(desc->conn_handle, /*min conn interval*/12, /*max conn interval*/12, /*latency*/2, /*timeout*/500);
 
-  deviceConnected = true;
   Serial.println("Central connected. Start sending updates.");
 }
 
 void ServerCallbacks::onDisconnect(BLEServer* server) {
-  deviceConnected = false;
-  Serial.println("Central disconnected; Advertising again...");
-  //BLEDevice::startAdvertising();
+  Serial.println("Central disconnected; Advertising auto restarts...");
 }

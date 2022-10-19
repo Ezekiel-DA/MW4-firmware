@@ -93,30 +93,21 @@ void loop()
     musicService->play();
   }
 
-  if (!deviceConnected && oldDeviceConnected) {
-    delay(100);
-    BLEDevice::startAdvertising();
-    Serial.println("start advertising");
-    oldDeviceConnected = deviceConnected;
-  }
-  if (deviceConnected && !oldDeviceConnected) {
-    Serial.println("main loop started");
-    oldDeviceConnected = deviceConnected;
-  }
-
   if (costumeController->dangerZone) {
     Serial.println("danger");
   }
 
-  LightDeviceService::globalAnimationUpdate();
+  if (!costumeController->OTAUpdateInProgress) {
+    LightDeviceService::globalAnimationUpdate();
 
-  frontText->update(altMode);
-  chairLights->update(altMode);
-  pedestalLights->update(altMode);
+    frontText->update(altMode);
+    chairLights->update(altMode);
+    pedestalLights->update(altMode);
 
-  FastLED.show();
+    FastLED.show();
 
-  saveSettings();
+    saveSettings();
+  }
 }
 
 void audio_id3data(const char *info){  //id3 metadata

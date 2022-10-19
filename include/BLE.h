@@ -8,9 +8,6 @@ class BLECharacteristic;
 class BLEService;
 class BLEUUID;
 
-static bool deviceConnected = false;
-static bool oldDeviceConnected = false;
-
 BLEServer* setupBLE();
 
 /**

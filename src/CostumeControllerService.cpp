@@ -13,8 +13,6 @@
 
 #define BLE_MAX_CHARACTERISTIC_SIZE 512
 
-bool updateInProgress = false;
-
 esp_ota_handle_t otaHandle = 0;
 
 CostumeControlService::CostumeControlService(BLEServer* iServer, uint8_t iVersion) : _fwVersion(iVersion) {
@@ -58,13 +56,13 @@ void CostumeControlService::onWrite(BLECharacteristic* characteristic) {
     switch (*data) {
       case OTA_CONTROL_START:
         Serial.println("Got OTA START control message");
-        assert(!updateInProgress);
-        updateInProgress = true;
+        assert(!OTAUpdateInProgress);
+        OTAUpdateInProgress = true;
 
         // this supposedly helps prevent the BLE central from disconnecting while we perform esp_ota_begin, which is pretty slow?
         // not sure it actually does anything, the connection settings elsewhere seem more important.
-        esp_task_wdt_init(10, false);
-        vTaskDelay(5);
+        esp_task_wdt_init(20, false);
+        vTaskDelay(50 / portTICK_PERIOD_MS);
 
         if (esp_ota_begin(esp_ota_get_next_update_partition(NULL), OTA_SIZE_UNKNOWN, &otaHandle) != ESP_OK) {
           Serial.println("esp_ota_begin failed?!");
@@ -75,8 +73,8 @@ void CostumeControlService::onWrite(BLECharacteristic* characteristic) {
         break;
       case OTA_CONTROL_END:
       Serial.println("Got OTA END control message");
-        assert(updateInProgress);
-        updateInProgress = false;
+        assert(OTAUpdateInProgress);
+        OTAUpdateInProgress = false;
 
         esp_ota_end(otaHandle);
         otaHandle = 0;
@@ -97,7 +95,7 @@ void CostumeControlService::onWrite(BLECharacteristic* characteristic) {
         break;
     }
   } else if (id.equals(std::string(MW4_BLE_COSTUME_CONTROL_OTA_DATA_CHARACTERISTIC_UUID))) {
-    if (!updateInProgress) {
+    if (!OTAUpdateInProgress) {
       Serial.println("Got OTA DATA while not performing OTA");
       // TODO: one day, we should probably use this to signal the buffer size from the central?
     } else {
