@@ -1,7 +1,7 @@
 {
     "musicService": {
         "state": true,
-        "volume": 2,
+        "volume": 21,
         "track": 0
     },
     "frontText": {
@@ -19,7 +19,7 @@
             "text": "I WANT YOU",
             "scrolling": true,
             "scrollSpeed": 50,
-            "pauseTime": 5,
+            "pauseTime": 4,
             "fgColor": "0xFFFFFF",
             "bgColor": "0x000000"
         }
@@ -29,12 +29,12 @@
             "state": true,
             "mode": 1,
             "hue": 255,
-            "saturation": 0,
+            "saturation": 255,
             "value": 255
         },
         "alt": {
             "state": true,
-            "mode": 3,
+            "mode": 0,
             "hue": 255,
             "saturation": 0,
             "value": 180
@@ -50,10 +50,10 @@
         },
         "alt": {
             "state": true,
-            "mode": 1,
+            "mode": 0,
             "hue": 255,
             "saturation": 0,
-            "value": 255
+            "value": 180
         }
     }
 }
