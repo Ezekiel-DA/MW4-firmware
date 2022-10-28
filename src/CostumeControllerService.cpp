@@ -74,8 +74,7 @@ void CostumeControlService::onWrite(BLECharacteristic* characteristic) {
       case OTA_CONTROL_END:
       Serial.println("Got OTA END control message");
         assert(OTAUpdateInProgress);
-        OTAUpdateInProgress = false;
-
+        
         esp_ota_end(otaHandle);
         otaHandle = 0;
 

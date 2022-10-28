@@ -1,13 +1,13 @@
 #pragma once
 
-#define FW_VERSION 2
+#define FW_VERSION 3
 
 #define DEFAULTS_SETTINGS_FILE  "/defaults.json"
 #define USER_SETTINGS_FILE      "/settings.json"
 
 // TODO: CHANGE ME! Defaults for dev device vs costume
 #define BUTTON_PIN        21
-//#define BUTTON_PIN          0 // for testing; use 21 above for the costume
+// #define BUTTON_PIN          0 // for testing; use 21 above for the costume
 
 #define PULSE_BPM 20
 

@@ -107,6 +107,7 @@ audioMessage transmitReceive(audioMessage msg) {
 void audioSetVolume(uint8_t vol) {
   audioTxMessage.cmd = SET_VOLUME;
   audioTxMessage.value = vol;
+  Serial.print("Setting volume to: "); Serial.println(vol);
   audioMessage RX = transmitReceive(audioTxMessage);
 }
 
@@ -158,12 +159,13 @@ void MusicService::onWrite(BLECharacteristic* characteristic) {
     this->settings->track = *data;
   } else if (id.equals(std::string(MW4_BLE_MUSIC_CONTROL_VOLUME_CHARACTERISTIC))) {
     this->settings->volume = *data;
-    audioSetVolume(this->settings->volume);
   } else if (id.equals(std::string(MW4_BLE_STATE_CHARACTERISTIC_UUID))) {
     this->settings->state = (*data) != 0;
   }
 
   portEXIT_CRITICAL(&settingsMutex);
+
+  audioSetVolume(this->settings->volume);
 
   markSettingsModified();
 }
